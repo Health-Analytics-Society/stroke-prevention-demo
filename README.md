@@ -32,3 +32,25 @@ By the end of the semester, this project will deliver a **Streamlit dashboard** 
 ```bash
 git clone https://github.com/Health-Analytics-Society/stroke-prevention-demo.git
 cd stroke-prevention-demo
+
+2. Create and activate a virtual environment (no conda)
+
+macOS / Linux
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+
+Windows (PowerShell)
+
+py -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+
+3. Install dependencies
+pip install -r requirements.txt
+
+4. Run the Streamlit app
+streamlit run app/streamlit_app.py
+
+
+If the dashboard loads, your setup works ✅
