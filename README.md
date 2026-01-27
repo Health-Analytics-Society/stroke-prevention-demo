@@ -28,7 +28,7 @@ By the end of the semester, this project will deliver a **Streamlit dashboard** 
 
 ## 🚀 Quick Start (Local Setup)
 
-### 1. Clone the repository
+### 1. Clone the repository (preferably VS Code Terminal)
 ```bash
 git clone https://github.com/Health-Analytics-Society/stroke-prevention-demo.git
 cd stroke-prevention-demo
