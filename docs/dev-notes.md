@@ -1,4 +1,4 @@
-# Developer Notes (Read Once)
+# Developer Notes 
 
 These notes explain how to work on this project locally without running into common issues.
 You do **not** need to memorize this — just follow the rules below.
