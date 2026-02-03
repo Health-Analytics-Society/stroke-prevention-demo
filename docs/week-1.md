@@ -19,6 +19,7 @@ streamlit run app/streamlit_app.py
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install -r requirements.txt
 streamlit run app/streamlit_app.py
 ```
