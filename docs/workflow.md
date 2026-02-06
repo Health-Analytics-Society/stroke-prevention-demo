@@ -156,12 +156,3 @@ deactivate
 
 ---
 
-## 🧠 One-line summary
-
-> Pull `main` → create/switch branch → work → commit → push → PR.
-
-```
-
----
-- or help you handle **common mistakes live**
-```
