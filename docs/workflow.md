@@ -1,4 +1,4 @@
-# 🧭 Daily Workflow: How to Start, Pull, Work, and Push
+# Daily Workflow: How to Start, Pull, Work, and Push
 
 Follow these steps **every time** you work on the project.
 
