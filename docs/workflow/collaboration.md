@@ -25,9 +25,9 @@ feature/<ticket-id>-short-name
 
 Examples:
 
-- feature/DP-1-baseline-model
-- feature/DC-1-data-dictionary
-- feature/APP-2-example-mode
+- feature/DP1-baseline-model
+- feature/DC1-data-dictionary
+- feature/APP2-example-mode
 
 ---
 
@@ -43,8 +43,8 @@ The branch owner creates the branch and pushes it.
 Example:
 
 ```bash
-git checkout -b feature/DP-1-baseline-model
-git push origin feature/DP-1-baseline-model
+git checkout -b feature/DP1-baseline-model
+git push origin feature/DP1-baseline-model
 ```
 
 ---
@@ -63,8 +63,8 @@ git pull origin feature/<ticket-id>-short-name
 Example:
 
 ```bash
-git checkout feature/DP-1-baseline-model
-git pull origin feature/DP-1-baseline-model
+git checkout feature/DP1-baseline-model
+git pull origin feature/DP1-baseline-model
 ```
 
 ---
@@ -97,8 +97,8 @@ git push origin feature/<ticket-id>-short-name
 Example:
 
 ```bash
-git commit -m "DP-1: baseline logistic regression + metrics"
-git push origin feature/DP-1-baseline-model
+git commit -m "DP1: baseline logistic regression + metrics"
+git push origin feature/DP1-baseline-model
 ```
 
 ---

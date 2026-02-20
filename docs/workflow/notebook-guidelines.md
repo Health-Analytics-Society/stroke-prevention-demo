@@ -26,9 +26,9 @@ Format:
 
 Examples:
 
-- dokeke_DP-3_data-sanity-check.ipynb
-- edarkwa_DC-1_data-dictionary-explore.ipynb
-- jdoe_DP-1_baseline-logreg.ipynb
+- dokeke_DP3_data-sanity-check.ipynb
+- edarkwa_DC1_data-dictionary-explore.ipynb
+- jdoe_DP1_baseline-logreg.ipynb
 
 Rules:
 

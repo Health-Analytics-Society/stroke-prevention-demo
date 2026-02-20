@@ -59,9 +59,9 @@ feature/<ticket-id>-short-name
 
 Examples:
 
-- feature/DP-1-baseline-model
-- feature/DC-3-disclaimer-text
-- feature/APP-2-example-mode
+- feature/DP1-baseline-model
+- feature/DC3-disclaimer-text
+- feature/APP2-example-mode
 
 **If this is your first time working on the ticket**
 
