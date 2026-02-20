@@ -1,34 +1,31 @@
-# Week 1: Getting Started
+# Week 01 Recap
 
-## Goal
-Your only goal this week is to **touch the project once**.
+## Meeting goal
+Get everyone set up to contribute and start the search for a credible stroke dataset.
 
-## Setup (no conda)
-We are using Python + `venv`.
+## What we did
+- Set up the development environment (VS Code + Python setup)
+- Made sure people could access the repo and understand the basics of how we will collaborate
+- Started dataset search and discussion
 
-### macOS / Linux
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app/streamlit_app.py
-````
+## Mini lesson
+### What “good data” means for a health project
+We talked about how we are not just looking for any dataset, we want a dataset that is credible and usable.
 
-### Windows (PowerShell)
+Key things we want:
+- Clear, valid outcome label (stroke outcome is actually defined and not vague)
+- Individual level rows (person level, not county averages) so we can score one person
+- Relevant features that match real risk factors (age, BP, diabetes, smoking, etc.)
+- Reputable source and documentation (where did it come from and how was it collected)
+- Enough sample size and reasonable class balance (not a tiny dataset)
+- Minimal leakage risk (features that secretly reveal the answer)
+- Understandable codes and variable meanings (so we can write docs and explain it)
 
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-pip install -r requirements.txt
-streamlit run app/streamlit_app.py
-```
+## What got done (tangible outputs)
+- Everyone left with clear expectations for how to contribute
+- Team members were assigned to bring dataset options for Week 02
 
-## What counts as done
-
-* Run the app **OR**
-* Add notes **OR**
-* Push a small commit
-
-**Progress beats perfection.**
-ok
+## What’s next (Week 02)
+- Share dataset options
+- Do quick EDA checks
+- Narrow toward 1 v1 dataset choice
