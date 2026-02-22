@@ -1,7 +1,4 @@
-# docs/recaps/week-03.md
 # Week 03 Recap
-Date: (fill in)
-Attendance: (fill in)
 
 ## Meeting goal
 Select the v1 dataset and begin the first tickets.

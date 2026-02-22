@@ -2,23 +2,7 @@
 
 Follow these steps every time you work on the project.
 
----
-
-## 0) Before you start (required if you want to push)
-
-If you cannot push to GitHub or open a PR, you probably do not have write access yet.
-
-To get write access:
-
-1. Message the Project Team GC (Slack or Teams)
-2. Send your GitHub username
-3. A lane lead will add you
-
-Example message:
-
-```
-"My GitHub username is: yourusername"
-```
+> New to the project? See [setup.md](setup.md) first to get write access and set up your environment.
 
 ---
 
@@ -94,23 +78,8 @@ Important:
 
 ### 4) Activate the virtual environment (only if running Python)
 
-If you are running Python scripts, notebooks, or Streamlit, activate the venv first.
-
-macOS or Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Windows (PowerShell):
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-If you see `(.venv)` in your terminal, you are good.
-
-If you are only editing docs, you can skip this step.
+See [setup.md](setup.md) for activation commands (macOS/Linux and Windows).
+You should see `(.venv)` in your terminal. If you are only editing docs, skip this step.
 
 ---
 
@@ -204,16 +173,6 @@ Ticket: APP-2
 ```
 
 Draft PRs are allowed.
-
----
-
-## Important rules
-
-- Always pull from main
-- Never push to main
-- One ticket equals one branch equals one PR (unless a lead says you are pairing)
-- Do not commit .venv/
-- If stuck for 5 minutes, post the exact error in the issue comments and tag your lane lead
 
 ---
 

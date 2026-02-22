@@ -1,6 +1,6 @@
-# Notebook Guidelines (Always Current)
+# Notebook Guidelines
 
-Goal: Notebooks help us explore data, test ideas, and share findings without breaking the main code.
+Notebooks help us explore data, test ideas, and share findings without breaking the main code.
 
 ---
 

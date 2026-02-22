@@ -1,7 +1,7 @@
 # Week 0: Getting Started
 
 ## Goal
-Your only goal this week is to **touch the project once**.
+Your only goal is to **touch the project once**.
 
 ## Setup (no conda)
 We are using Python + `venv`.

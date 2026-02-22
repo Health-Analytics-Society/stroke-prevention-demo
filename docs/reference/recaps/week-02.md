@@ -1,6 +1,5 @@
 # Week 02 Recap
 
-
 ## Meeting goal
 Review dataset options, do quick EDA, and decide what dataset is best for v1.
 

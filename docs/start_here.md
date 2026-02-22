@@ -67,7 +67,7 @@ If you are actively working tickets, use the Teams GC.
 ## Where everything lives
 
 ### 1) Weekly recaps (what happened each meeting)
-Folder: `docs/recaps/`  
+Folder: `docs/reference/recaps/`  
 What it contains:
 - One file per meeting week
 - What got done, what is blocked, what is next
@@ -75,8 +75,8 @@ What it contains:
 Start here if you missed a meeting.
 
 Example links:
-- [Recaps folder](./recaps/)
-- [Latest recap](./recaps/week-04.md)
+- [Recaps folder](./reference/recaps/)
+- [Latest recap](./reference/recaps/week-04.md)
 
 ---
 
@@ -89,44 +89,31 @@ What it contains:
 
 Links:
 - [Workflow overview](./workflow/workflow.md)
-- [Dev notes](./workflow/dev-notes.md)
-- [Ticket collaboration rules](./workflow/ticket-collab.md)
-- [Notebook rules](./workflow/notebook-rules.md)
+- [Setup](./workflow/setup.md)
+- [Collaboration rules](./workflow/collaboration.md)
+- [Notebook guidelines](./workflow/notebook-guidelines.md)
 
 ---
 
-### 3) Project docs (what the project is, decisions, scope)
-Folder: `docs/project/`  
+### 3) Reference docs (important project facts and constraints)
+Folder: `docs/reference/`  
 What it contains:
-- Project state and current status
-- Scope and deliverables
-- Decisions made so we do not re debate the same stuff
-- Dataset summary and provenance
-
-Links:
-- [Project state (always current)](./project/project_state.md)
-- [Scope and deliverables](./project/scope.md)
-- [Decisions log](./project/decisions.md)
-- [Dataset summary](./project/dataset.md)
-
----
-
-### 4) Data docs (what the dataset columns mean and what is safe to use)
-Folder: `docs/data/`  
-What it contains:
-- Data dictionary
+- Data dictionary (column meanings and codes)
 - Leakage candidates (columns we should not use as model inputs)
-- Preprocessing notes
+- Any “must know” project constraints that affect modeling and the demo
+- A subfolder for weekly recaps
 
 Links:
-- [Data dictionary](./data/data_dictionary.md)
-- [Leakage candidates](./data/leakage_candidates.md)
-- [Preprocessing notes](./data/preprocessing_notes.md)
+- [Data dictionary](./reference/data_dictionary.md)
+- [Leakage candidates](./reference/leakage_candidates.md)
+
+Note:
+Some files in `docs/reference/` are not “app text”. They are core references the team uses to build the model and the demo correctly.
 
 ---
 
-### 5) Content docs (the words the Streamlit app will show to users)
-Folder: `docs/content/`  
+### 4) App content docs (the words the Streamlit app will show to users)
+Folder: `docs/app_content/`  
 What it contains:
 - Recommended Next Steps mapping (risk factor to tips)
 - Risk level labels (low, medium, high)
@@ -134,13 +121,13 @@ What it contains:
 - FAQ and learn more text
 
 Links:
-- [Recommended Next Steps](./content/recommended_next_steps.md)
-- [Risk level labels](./content/risk_level_labels.md)
-- [Disclaimer and limitations](./content/disclaimer_and_limitations.md)
-- [FAQ](./content/faq.md)
+- [Recommended Next Steps](./app_content/recommended_next_steps.md)
+- [Risk level labels](./app_content/risk_level_labels.md)
+- [Disclaimer and limitations](./app_content/disclaimer_and_limitations.md)
+- [FAQ](./app_content/faq.md)
 
 Rule:
-If the user will read it in the app, it belongs in `docs/content/`.
+If the user will read it in the app, it belongs in `docs/app_content/`.
 
 ---
 
@@ -172,5 +159,7 @@ Ask your lane lead first. If it blocks multiple lanes, tag the Project Manager.
 ## If you were not here last meeting
 
 Do these two things:
-1) Read the latest recap: [Latest recap](./recaps/week-04.md)
-2) Check the project state: [Project state](./project/project_state.md)
+1) Read the latest recap: [Latest recap](./reference/recaps/week-04.md)
+2) Check the project state and current status in the repo, then skim the reference docs:
+   - [Data dictionary](./reference/data_dictionary.md)
+   - [Leakage candidates](./reference/leakage_candidates.md)

@@ -7,27 +7,12 @@ This explains how to collaborate without overwriting each other.
 ## Default rule
 
 One ticket equals one person equals one branch equals one PR.
+See [workflow.md](workflow.md) for branch naming and the daily workflow.
 
 Only share a branch if:
 
 - A lane lead says you are pairing, or
 - The GitHub issue explicitly says "pair work"
-
----
-
-## Branch naming (required)
-
-Branch format:
-
-```text
-feature/<ticket-id>-short-name
-```
-
-Examples:
-
-- feature/DP1-baseline-model
-- feature/DC1-data-dictionary
-- feature/APP2-example-mode
 
 ---
 

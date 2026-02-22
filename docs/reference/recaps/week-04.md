@@ -16,14 +16,14 @@ We split into 3 lanes:
 - Started the data sanity check notebook (work began, not fully finished)
 
 ### Docs + Content lane
-- Collaborated with Data + Pipeline to finalize the list of leakage columns (inputs we should not use)
-- Got most of the data dictionary moving forward (core documentation work)
+- Collaborated with Data + Pipeline to finalize the list of leakage columns (inputs we should not use), found in /docs/content folder
+- Finished the data dictionary in /docs/content folder
 
 ### App lane
 - App lead was not present, so app tickets were not worked during this meeting
 
 ## Why this meeting mattered
-- We stopped doing “talk only” meetings and created real forward progress
+- We created real forward progress
 - The project now has a baseline model foundation plus clearer understanding of what columns are safe to use
 - This unlocks future work: better modeling, clearer explanations, and eventually wiring content into the Streamlit demo
 
