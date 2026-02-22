@@ -16,8 +16,8 @@ We split into 3 lanes:
 - Started the data sanity check notebook (work began, not fully finished)
 
 ### Docs + Content lane
-- Collaborated with Data + Pipeline to finalize the list of leakage columns (inputs we should not use), found in /docs/content folder
-- Finished the data dictionary in /docs/content folder
+- Collaborated with Data + Pipeline to finalize the list of leakage columns (inputs we should not use), found in `docs/reference/leakage_candidates.md`
+- Finished the data dictionary in `docs/reference/data_dictionary.md`
 
 ### App lane
 - App lead was not present, so app tickets were not worked during this meeting

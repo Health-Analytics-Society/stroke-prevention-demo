@@ -75,7 +75,7 @@ Example:
 
 ```python
 import pandas as pd
-df = pd.read_csv("data/processed/your_file.csv")
+df = pd.read_csv("data/raw/stroke_data.csv")
 df.head()
 ```
 

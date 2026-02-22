@@ -98,12 +98,14 @@ Links:
 ### 3) Reference docs (important project facts and constraints)
 Folder: `docs/reference/`  
 What it contains:
+- Project state (current status, what is done, what is next)
 - Data dictionary (column meanings and codes)
 - Leakage candidates (columns we should not use as model inputs)
-- Any “must know” project constraints that affect modeling and the demo
+- Any "must know" project constraints that affect modeling and the demo
 - A subfolder for weekly recaps
 
 Links:
+- [Project state](./reference/project_state.md)
 - [Data dictionary](./reference/data_dictionary.md)
 - [Leakage candidates](./reference/leakage_candidates.md)
 
@@ -160,6 +162,7 @@ Ask your lane lead first. If it blocks multiple lanes, tag the Project Manager.
 
 Do these two things:
 1) Read the latest recap: [Latest recap](./reference/recaps/week-04.md)
-2) Check the project state and current status in the repo, then skim the reference docs:
+2) Check the project state doc, then skim the reference docs:
+   - [Project state](./reference/project_state.md) — current status, what is done, what is next
    - [Data dictionary](./reference/data_dictionary.md)
    - [Leakage candidates](./reference/leakage_candidates.md)
