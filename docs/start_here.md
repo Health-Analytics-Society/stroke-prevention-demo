@@ -110,7 +110,7 @@ Links:
 - [Leakage candidates](./reference/leakage_candidates.md)
 
 Note:
-Some files in `docs/reference/` are not “app text”. They are core references the team uses to build the model and the demo correctly.
+Files in `docs/reference/` are not “app text”. They are core references the team uses to build the model and the demo correctly.
 
 ---
 
