@@ -51,9 +51,15 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 3. Install dependencies
 pip install -r requirements.txt
+or 
+pip3 install -r requirements.txt
+
 
 4. Run the Streamlit app
 streamlit run app/streamlit_app.py
+
+or 
+python3 -m streamlit run app/streamlit_app.py
 
 
 If the dashboard loads, your setup works ✅
