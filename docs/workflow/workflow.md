@@ -144,7 +144,7 @@ Sync main → create branch → activate venv → do work → commit small → p
 
 The default rule: **one ticket = one person = one branch = one PR.**
 
-Only share a branch if a lane lead says you are pairing, or the GitHub issue explicitly says "pair work."
+Only share a branch if a lane lead says you are pairing.
 
 ---
 
@@ -248,11 +248,9 @@ Every notebook must include these sections in order.
 ```markdown
 # <Short Title>
 
-Name: <Your Name>
-NetID: <netid>
-Ticket: <ticket-id>
-GitHub Issue: #<github-issue-number>
 
+Ticket: <ticket-id>
+Contributors: <contributor-names>
 Goal: <1 sentence>
 ```
 
