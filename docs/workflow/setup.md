@@ -1,10 +1,10 @@
-# First-Time Setup & Local Rules
+# Setup Guide
 
 Do this once when you join the project. Refer back as needed.
 
 ---
 
-## Get write access
+## 1. Get write access
 
 If you cannot push or open a PR, you need to be added first.
 
@@ -18,27 +18,61 @@ If you cannot push or open a PR, you need to be added first.
 
 ---
 
-## Activate the virtual environment
+## 2. Clone the repository
 
-Always activate the venv before running Python scripts, notebooks, or Streamlit.
+Run from wherever you want the project to live on your machine:
 
-macOS / Linux:
+```bash
+git clone https://github.com/<org>/stroke-prevention-demo.git
+cd stroke-prevention-demo
+```
+
+---
+
+## 3. Create the virtual environment
+
+Do this once per machine.
+
+**macOS / Linux:**
+
+```bash
+python3 -m venv .venv
+```
+
+**Windows (PowerShell):**
+
+```powershell
+python -m venv .venv
+```
+
+---
+
+## 4. Activate the virtual environment
+
+Do this every time you open a new terminal session.
+
+**macOS / Linux:**
 
 ```bash
 source .venv/bin/activate
 ```
 
-Windows (PowerShell):
+**Windows (PowerShell):**
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-You should see `(.venv)` in your terminal. If you do not, stop and activate it.
+> If you see a permissions error on Windows, run this once in PowerShell as Administrator, then try again:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
+You should see `(.venv)` in your terminal prompt. If you do not, stop and activate it before continuing.
 
 ---
 
-## Install dependencies
+## 5. Install dependencies
 
 Only run this after activating the venv:
 
@@ -46,16 +80,24 @@ Only run this after activating the venv:
 pip install -r requirements.txt
 ```
 
+Run this again any time `requirements.txt` changes (e.g., after pulling new changes).
+
 ---
 
-## Always run from the project root
+## 6. Always run from the project root
 
 Run all commands from `stroke-prevention-demo/`, not from inside a subfolder.
 
-Example:
+**Example — launch the app:**
 
 ```bash
 streamlit run app/streamlit_app.py
+```
+
+**Example — run a script:**
+
+```bash
+python src/some_script.py
 ```
 
 ---

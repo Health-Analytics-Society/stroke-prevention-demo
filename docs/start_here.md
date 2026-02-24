@@ -84,14 +84,12 @@ Example links:
 Folder: `docs/workflow/`  
 What it contains:
 - How to sync with main, make a branch, and open a PR
-- Dev setup notes
-- Notebook rules and collaboration rules
+- Dev setup (Windows and macOS)
+- Collaboration rules, notebook guidelines, and PR process
 
 Links:
-- [Workflow overview](./workflow/workflow.md)
 - [Setup](./workflow/setup.md)
-- [Collaboration rules](./workflow/collaboration.md)
-- [Notebook guidelines](./workflow/notebook-guidelines.md)
+- [Workflow, collaboration & notebook guidelines](./workflow/workflow.md)
 
 ---
 
