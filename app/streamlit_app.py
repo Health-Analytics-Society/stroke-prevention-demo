@@ -52,3 +52,33 @@ pip install -r requirements.txt
 streamlit run app/streamlit_app.py""",
         language="powershell",
     )
+
+
+# RESULTS SECTION
+
+
+st.divider()
+st.subheader("Your Stroke Risk Score")
+
+
+# Placeholder example output
+st.write("Risk score: **12% (example)**")
+
+
+st.subheader("Prevention Tips")
+st.markdown(
+    """
+    - Maintain a balanced, heart-healthy diet
+    - Stay physically active throughout the week
+    - Monitor blood pressure and cholesterol regularly
+    """
+)
+
+
+st.subheader("Disclaimer")
+
+# TODO (DC-3): Replace this placeholder disclaimer with approved final text
+st.info(
+    "This tool is for educational purposes only and does not provide medical advice. "
+    "Always consult a qualified healthcare professional for medical decisions."
+)
