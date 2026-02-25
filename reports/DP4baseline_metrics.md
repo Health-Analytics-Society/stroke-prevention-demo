@@ -15,22 +15,14 @@ stroke
 1     362
 
 ## Metrics on test set
-Accuracy: 0.9218
-Precision: 0.0000
-Recall: 0.0000
-ROC AUC: 0.5966332940714567
+Accuracy: 0.6547
+Precision: 0.1108
+Recall: 0.4861
+ROC AUC: 0.6107021332286351
 
 ## Confusion matrix on test set
 Format is [[TN FP]
            [FN TP]]
 
-[[849   0]
- [ 72   0]]
-
-## New vs Old ROC AUC
-New: 0.5966332940714567
-Old: 0.6045183876455961
-
-## New vs Old recall
-New: 0.0
-Old: 0.0
+[[568 281]
+ [ 37  35]]
