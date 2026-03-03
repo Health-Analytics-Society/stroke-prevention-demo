@@ -1,10 +1,88 @@
+from pathlib import Path # part of helpers
 import streamlit as st
+
+
+# Helper Path Function
+DOCS_DIR = Path(__file__).resolve().parents[1] / "docs" / "app_content" # moves up to the project root (because app/ is one level under the root).
+DC2_PATH = DOCS_DIR / "recommended_next_steps.md" 
+DC3_PATH = DOCS_DIR / "disclaimer_and_limitations.md"
+
+
+@st.cache_data #prevents re-reading the file from disk every rerun (so basically faster).
+def read_text(path: Path) -> str:
+    """Read a UTF-8 text file safely."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+
+
+
+#It scans the markdown file line-by-line.
+# It grabs the first 3 bullet lines anywhere in the file.
+import re
+
+def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3) -> list[str]:
+    """
+    Extract up to n bullet steps from the section:
+    ## <number>. Risk factor: `<risk_factor_key>`
+    under the subheader '**Recommended next steps:**'
+    """
+    lines = md.splitlines()
+
+    # Find the risk factor header line
+    header_pattern = re.compile(rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`\s*$")
+    start_idx = None
+    for i, line in enumerate(lines):
+        if header_pattern.match(line.strip()):
+            start_idx = i
+            break
+    if start_idx is None:
+        return []
+
+    # Section goes until next "## " header or end of file
+    end_idx = len(lines)
+    for j in range(start_idx + 1, len(lines)):
+        if lines[j].strip().startswith("## "):
+            end_idx = j
+            break
+
+    section = lines[start_idx:end_idx]
+
+    # Find the "Recommended next steps" marker inside the section
+    rec_idx = None
+    for i, line in enumerate(section):
+        if "Recommended next steps" in line:
+            rec_idx = i
+            break
+    if rec_idx is None:
+        return []
+
+    # Collect bullet lines after that marker
+    tips = []
+    for line in section[rec_idx + 1:]:
+        s = line.strip()
+        if s.startswith(("## ", "**Why it matters:**")):
+            break  # stop if we hit a new subsection/header
+        if s.startswith(("-", "*", "•")):
+            item = s.lstrip("-*•").strip()
+            if item:
+                tips.append(item)
+        if len(tips) >= n:
+            break
+
+    return tips
+
+
 
 st.set_page_config(
     page_title="Stroke Prevention Demo",
     page_icon="🧠",
     layout="wide"
 )
+
+
+
 
 st.title("🧠 Stroke Prevention Demo")
 st.write("If you can see this page, your setup works ✅")
@@ -54,31 +132,70 @@ streamlit run app/streamlit_app.py""",
     )
 
 
-# RESULTS SECTION
+# RESULTS SECTION OLD 
+
+# st.divider()
+# st.subheader("Your Stroke Risk Score")
+
+
+# # Placeholder example output
+# st.write("Risk score: **12% (example)**")
+
+
+# st.subheader("Prevention Tips")
+# st.markdown(
+#     """
+#     - Maintain a balanced, heart-healthy diet
+#     - Stay physically active throughout the week
+#     - Monitor blood pressure and cholesterol regularly
+#     """
+# )
+
+
+# st.subheader("Disclaimer")
+
+# # TODO (DC-3): Replace this placeholder disclaimer with approved final text
+# st.info(
+#     "This tool is for educational purposes only and does not provide medical advice. "
+#     "Always consult a qualified healthcare professional for medical decisions."
+# )
+
+
 
 
 st.divider()
 st.subheader("Your Stroke Risk Score")
 
+use_example = st.toggle("Use example output", value=True)
 
-# Placeholder example output
-st.write("Risk score: **12% (example)**")
+if use_example:
+    # Placeholder example output
+    st.write("Risk score: **12% (example)**")
 
+    st.subheader("Prevention Tips")
 
-st.subheader("Prevention Tips")
-st.markdown(
-    """
-    - Maintain a balanced, heart-healthy diet
-    - Stay physically active throughout the week
-    - Monitor blood pressure and cholesterol regularly
-    """
-)
+    dc2_text = read_text(DC2_PATH)
+    tips = extract_recommended_steps(dc2_text, risk_factor_key="sleep time", n=3)
 
+    if tips:
+        for t in tips:
+            st.markdown(f"- {t}")
+    else:
+        st.warning(
+            "Could not load prevention tips from DC-2. "
+            f"Expected file at: `{DC2_PATH}`"
+        )
+else:
+    st.info("Model output coming soon.")
 
 st.subheader("Disclaimer")
 
-# TODO (DC-3): Replace this placeholder disclaimer with approved final text
-st.info(
-    "This tool is for educational purposes only and does not provide medical advice. "
-    "Always consult a qualified healthcare professional for medical decisions."
-)
+dc3_text = read_text(DC3_PATH)
+if dc3_text.strip():
+    # Showing the disclaimer text directly from DC-3
+    st.markdown(dc3_text)
+else:
+    st.warning(
+        "Could not load disclaimer text from DC-3. "
+        f"Expected file at: `{DC3_PATH}`"
+    )
