@@ -23,15 +23,20 @@ def read_text(path: Path) -> str:
 import re
 
 def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3) -> list[str]:
+    #the default is 3 hence the int = 3
     """
     Extract up to n bullet steps from the section:
     ## <number>. Risk factor: `<risk_factor_key>`
     under the subheader '**Recommended next steps:**'
     """
-    lines = md.splitlines()
+    lines = md.splitlines() #this converts the entire markdown string into a list of lines.
 
     # Find the risk factor header line
     header_pattern = re.compile(rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`\s*$")
+    # used re.escape if the your risk factor had special characters, regex could break. But it shouldn't but chat recommended it.
+    # the line must start with ## based on the md file 
+
+    #just looping through every line
     start_idx = None
     for i, line in enumerate(lines):
         if header_pattern.match(line.strip()):
@@ -40,7 +45,7 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3) -> list
     if start_idx is None:
         return []
 
-    # Section goes until next "## " header or end of file
+    # this allows the section goes until next "## " header or end of the file
     end_idx = len(lines)
     for j in range(start_idx + 1, len(lines)):
         if lines[j].strip().startswith("## "):
@@ -49,7 +54,7 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3) -> list
 
     section = lines[start_idx:end_idx]
 
-    # Find the "Recommended next steps" marker inside the section
+    # this finds the "Recommended next steps" marker inside the section
     rec_idx = None
     for i, line in enumerate(section):
         if "Recommended next steps" in line:
@@ -58,12 +63,12 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3) -> list
     if rec_idx is None:
         return []
 
-    # Collect bullet lines after that marker
+    # collects the bullet lines after that marker
     tips = []
     for line in section[rec_idx + 1:]:
         s = line.strip()
         if s.startswith(("## ", "**Why it matters:**")):
-            break  # stop if we hit a new subsection/header
+            break  # stops ti if we hit a new subsection
         if s.startswith(("-", "*", "•")):
             item = s.lstrip("-*•").strip()
             if item:
