@@ -1,13 +1,13 @@
 from pathlib import Path # part of helpers
 import streamlit as st
+import re # for regex
 
 
 
 # Helper Path Function
-DOCS_DIR = Path(__file__).resolve().parents[1] / "docs" / "app_content" # moves up to the project root (because app/ is one level under the root).
-DC2_PATH = DOCS_DIR / "recommended_next_steps.md" 
+DOCS_DIR = Path(__file__).resolve().parents[1] / "docs" / "app_content"
+DC2_PATH = DOCS_DIR / "recommended_next_steps.md"
 DC3_PATH = DOCS_DIR / "disclaimer_and_limitations.md"
-
 
 @st.cache_data #prevents re-reading the file from disk every rerun (so basically faster).
 def read_text(path: Path) -> str: # reading the text file safely
@@ -16,10 +16,6 @@ def read_text(path: Path) -> str: # reading the text file safely
     except FileNotFoundError:
         return ""
 
-
-
-
-import re # for regex
 
 def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
     #the default is 3 hence the int = 3
@@ -40,7 +36,7 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
             break
 
     if start_idx is None:
-        return [], None
+        return None, []
 
     # this allows the section goes until next "## " header or end of the file
     end_idx = len(lines)
@@ -84,7 +80,7 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
             if len(tips) >= n:
                 break
 
-        return why_text,tips
+    return why_text,tips
 
 
 
