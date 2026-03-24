@@ -1,6 +1,8 @@
 from pathlib import Path # part of helpers
 import streamlit as st
 import re # for regex
+import pandas as pd
+import joblib # for the baseline pipeline
 
 
 
@@ -9,12 +11,32 @@ DOCS_DIR = Path(__file__).resolve().parents[1] / "docs" / "app_content"
 DC2_PATH = DOCS_DIR / "recommended_next_steps.md"
 DC3_PATH = DOCS_DIR / "disclaimer_and_limitations.md"
 
-@st.cache_data #prevents re-reading the file from disk every rerun (so basically faster).
+
+SCHEMA_PATH = DOCS_DIR / "app_input_schema.csv"
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "baseline_pipeline.joblib"
+# MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "fake_model.joblib"
+
+@st.cache_data # prevents re-reading the file from disk every rerun (so basically faster).
 def read_text(path: Path) -> str: # reading the text file safely
     try:
         return path.read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
+    
+@st.cache_data 
+def load_schema(path: Path) -> pd.DataFrame:  # reading the csv file safely
+    try:
+        return pd.read_csv(path)
+    except FileNotFoundError:
+        return pd.DataFrame()
+
+
+@st.cache_resource
+def load_model(path: Path):
+    try:
+        return joblib.load(path)
+    except FileNotFoundError:
+        return None
 
 
 def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
@@ -24,7 +46,10 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
     lines = md.splitlines() #this converts the entire markdown string into a list of lines.
 
     # Find the risk factor header line
-    header_pattern = re.compile(rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`\s*$")
+    # header_pattern = re.compile(rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`\s*$")
+    header_pattern = re.compile(
+    rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`(?:\s+.*)?$"
+)
     # used re.escape if the your risk factor had special characters, regex could break. But it shouldn't but chat recommended it.
     # the line must start with ## based on the md file 
 
@@ -81,6 +106,46 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
                 break
 
     return why_text,tips
+
+
+#helper funciton to build the user input form from the schema
+def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
+    user_inputs = {}
+
+    st.sidebar.header("Enter Health Information")
+
+    for _, row in schema_df.iterrows():
+        column_name = row["column_name"]
+        input_type = row["type"]
+        description = row["description"]
+
+        if input_type == "number":
+            min_val = float(row["min"]) if pd.notna(row["min"]) else None
+            max_val = float(row["max"]) if pd.notna(row["max"]) else None
+            default_val = float(row["default"]) if pd.notna(row["default"]) else 0.0
+
+            user_inputs[column_name] = st.sidebar.number_input(
+                label=column_name,
+                min_value=min_val,
+                max_value=max_val,
+                value=default_val,
+                help=description,
+            )
+
+        elif input_type == "category":
+            raw_options = str(row["options"]).split("|")
+            options = [int(opt) for opt in raw_options if opt != ""]
+            default_val = int(row["default"]) if pd.notna(row["default"]) else options[0]
+            default_index = options.index(default_val) if default_val in options else 0
+
+            user_inputs[column_name] = st.sidebar.selectbox(
+                label=column_name,
+                options=options,
+                index=default_index,
+                help=description,
+            )
+
+    return user_inputs
 
 
 
@@ -142,6 +207,18 @@ streamlit run app/streamlit_app.py""",
 
 
 
+schema_df = load_schema(SCHEMA_PATH)
+
+if schema_df.empty:
+    st.error("Input schema file is missing. Cannot build the app form.")
+    st.stop()
+
+user_inputs = build_inputs_from_schema(schema_df)
+input_df = pd.DataFrame([user_inputs])
+
+
+
+
 st.divider()
 st.subheader("Your Stroke Risk Score")
 
@@ -151,10 +228,23 @@ if use_example:
     # Placeholder example output
     st.write("Risk score: **12% (example)**")
 
-    st.subheader("Prevention Tips")
-
     dc2_text = read_text(DC2_PATH)
-    why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key="sleep time", n=3)
+    risk_factor_key = st.selectbox(
+    "Select a risk factor to explore",
+    [
+        "smoke",
+        "alcohol ",
+        "sleep time",
+        "Minutes sedentary activity",
+        "Body Mass Index",
+        "Systolic blood pressure",
+        "Fasting Glucose",
+        "Glycohemoglobin",
+        "High-density lipoprotein",
+        "Dietary fiber"
+    ]
+    )
+    why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key=risk_factor_key, n=3)
 
     st.subheader("Why This Matters")
     
@@ -173,7 +263,27 @@ if use_example:
             "Could not load prevention tips."
         )
 else:
-    st.info("Model output coming soon.")
+    model = load_model(MODEL_PATH)
+
+    if model is None:
+        st.warning("Model file is missing. Real model output is not available right now.")
+    else:
+        try:
+            probability = model.predict_proba(input_df)[0][1]
+
+            threshold = 0.30
+            risk_label = "High Risk" if probability >= threshold else "Low Risk"
+
+            st.success("Model Output")
+            # st.markdown("`Model output`")
+
+            st.write(f"Risk score: **{probability * 100:.1f}%**")
+            st.write(f"Risk classification: **{risk_label}**")
+
+            st.caption(f"Threshold: {threshold}")
+
+        except Exception as e:
+            st.error(f"Could not generate model output: {e}")
 
 st.subheader("Disclaimer")
 
