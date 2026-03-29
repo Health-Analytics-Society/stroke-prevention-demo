@@ -24,6 +24,14 @@ LEAKAGE_COLS = [
     "General health condition",
     "depression",
     "Minutes sedentary activity",
+    "Coronary Heart Disease",
+]
+
+# Columns excluded from the model (require lab tests; also treatment-confounded)
+EXCLUDE_COLS = [
+    "High-density lipoprotein",
+    "Triglyceride",
+    "Low-density lipoprotein",
 ]
 
 # Threshold for converting probability to High/Low risk label
@@ -254,12 +262,11 @@ else:
         )
     else:
         try:
-            # Strip column names and drop leakage cols to match what the pipeline was trained on
+            # Strip column names and drop leakage/excluded cols to match the pipeline
             model_input = input_df.copy()
             model_input.columns = model_input.columns.str.strip()
-            model_input = model_input.drop(
-                columns=[c for c in LEAKAGE_COLS if c in model_input.columns]
-            )
+            drop = [c for c in LEAKAGE_COLS + EXCLUDE_COLS if c in model_input.columns]
+            model_input = model_input.drop(columns=drop)
 
             probability = model.predict_proba(model_input)[0][1]
             risk_label = "High Risk" if probability >= THRESHOLD else "Low Risk"

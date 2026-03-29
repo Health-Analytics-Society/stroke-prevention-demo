@@ -21,7 +21,7 @@ Because our modeling goal is to estimate future stroke risk, any variable that c
 | depression | Depression can increase after a stroke, so it may reflect consequences rather than pre-stroke risk. | yes leakage |
 | sleep disorder | A sleep disorder diagnosis can occur or be recorded after a stroke due to increased medical contact. | maybe leakage |
 | sleep time | Sleep duration can change after major health events including stroke, so time-order is ambiguous. | maybe leakage |
-| Coronary Heart Disease | Cardiovascular diagnoses can be discovered or recorded after a stroke during follow-up care, so direction is unclear. | maybe leakage |
+| Coronary Heart Disease | Cardiovascular diagnoses can be discovered or recorded after a stroke during follow-up care, so direction is unclear. Cross-sectional data makes causal direction unresolvable; the 3x stroke rate difference is suspiciously strong. | yes leakage |
 | hypertension | High blood pressure is a real risk factor but may also be newly diagnosed after stroke-related clinical visits. | maybe leakage |
 | diabetes | Diabetes is a risk factor but can be detected after stroke because of additional medical workups. | maybe leakage |
 | high cholesterol | High cholesterol is a risk factor but may be diagnosed and treated after stroke, making timing ambiguous. | maybe leakage |

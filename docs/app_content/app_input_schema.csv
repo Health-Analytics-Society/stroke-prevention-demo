@@ -12,16 +12,12 @@ depression,category,,,1|2|3,1,1 = Several days; 2 = More than half the days; 3 =
 diabetes,category,,,0|1,0,0 = No; 1 = Yes
 hypertension,category,,,0|1,0,0 = No; 1 = Yes
 high cholesterol,category,,,0|1,0,0 = No; 1 = Yes
-Coronary Heart Disease,category,,,0|1,0,0 = No; 1 = Yes
 Body Mass Index,category,,,1|2|3|4,2,1 = Underweight (<18.5); 2 = Normal (18.5–24.9); 3 = Overweight (25–29.9); 4 = Obese (≥30)
 sleep time,number,1,14,,7,Hours of sleep per night
 Minutes sedentary activity,number,0,1200,,600,Minutes of sedentary activity per day
 Waist Circumference,number,63.5,176,,90.0,Waist circumference in cm
 Systolic blood pressure,number,66,238,,120,Systolic blood pressure in mm Hg
 Diastolic blood pressure,number,32,124,,80,Diastolic blood pressure in mm Hg
-High-density lipoprotein,number,0.28,5.84,,1.30,HDL cholesterol in mmol/L
-Triglyceride,number,0.203,28.778,,1.457,Triglycerides in mmol/L
-Low-density lipoprotein,number,0.388,9.232,,2.50,LDL cholesterol in mmol/L
 Fasting Glucose,number,1.998,26.09,,5.00,Fasting glucose in mmol/L
 Glycohemoglobin,number,2.0,16.4,,5.7,HbA1c percentage
 energy,number,0,13687,,2000,Dietary energy intake in kcal/day
