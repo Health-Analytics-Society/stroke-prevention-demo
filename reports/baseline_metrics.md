@@ -13,6 +13,7 @@ Dropped columns
 - General health condition
 - depression
 - Minutes sedentary activity
+- Coronary Heart Disease
 
 ## Threshold
 threshold: 0.3
@@ -24,21 +25,21 @@ stroke
 1     362
 
 ## Metrics on test set
-Accuracy: 0.4072
-Precision: 0.1037
-Recall: 0.8611
-ROC AUC: 0.6145
+Accuracy: 0.3789
+Precision: 0.0928
+Recall: 0.7917
+ROC AUC: 0.5911
 
 ## Confusion matrix on test set
 Format is [[TN FP]
            [FN TP]]
 
-[[313 536]
- [ 10  62]]
+[[292 557]
+ [ 15  57]]
 
 ## Score cutoffs from test set probabilities
-- min: 0.007715
-- median_p50: 0.388876
-- p80: 0.618423
-- p95: 0.772234
-- max: 0.925453
+- min: 0.034606
+- median_p50: 0.405626
+- p80: 0.631902
+- p95: 0.754752
+- max: 0.895770
