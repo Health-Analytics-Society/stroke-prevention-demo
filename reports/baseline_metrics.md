@@ -1,7 +1,7 @@
 # Baseline Metrics (Final Demo Baseline)
 
 ## Model
-Logistic Regression
+Logistic Regression with Elastic Net (penalty=elasticnet, C=1.0, l1_ratio=0.5, solver=saga)
 
 ## Split
 test_size: 0.2
@@ -25,21 +25,21 @@ stroke
 1     362
 
 ## Metrics on test set
-Accuracy: 0.3789
-Precision: 0.0928
-Recall: 0.7917
-ROC AUC: 0.5911
+Accuracy: 0.3768
+Precision: 0.0952
+Recall: 0.8194
+ROC AUC: 0.5868
 
 ## Confusion matrix on test set
 Format is [[TN FP]
            [FN TP]]
 
-[[292 557]
- [ 15  57]]
+[[288 561]
+ [ 13  59]]
 
 ## Score cutoffs from test set probabilities
-- min: 0.034606
-- median_p50: 0.405626
-- p80: 0.631902
-- p95: 0.754752
-- max: 0.895770
+- min: 0.015510
+- median_p50: 0.416681
+- p80: 0.632803
+- p95: 0.760670
+- max: 0.896320
