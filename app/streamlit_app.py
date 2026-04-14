@@ -215,6 +215,41 @@ def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
     return user_inputs
 
 
+def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    # Strip column names for consistency
+    df.columns = df.columns.str.strip()
+
+    # Multimorbidity: count of selected chronic conditions
+    chronic_cols = ["diabetes", "hypertension", "high cholesterol"]
+    for col in chronic_cols:
+        if col not in df.columns:
+            df[col] = 0
+
+    df["multimorbidity"] = (
+        df["diabetes"].astype(int)
+        + df["hypertension"].astype(int)
+        + df["high cholesterol"].astype(int)
+    )
+
+    # Interaction terms
+    if "age" not in df.columns:
+        df["age"] = 0
+    if "smoke" not in df.columns:
+        df["smoke"] = 0
+    if "hypertension" not in df.columns:
+        df["hypertension"] = 0
+    if "high cholesterol" not in df.columns:
+        df["high cholesterol"] = 0
+
+    df["age_x_hypertension"] = df["age"].astype(int) * df["hypertension"].astype(int)
+    df["age_x_smoke"] = df["age"].astype(int) * df["smoke"].astype(int)
+    df["age_x_high_cholesterol"] = df["age"].astype(int) * df["high cholesterol"].astype(int)
+
+    return df
+
+
 # ---------------------------------------------------------------------------
 # Page config & layout
 # ---------------------------------------------------------------------------
@@ -288,8 +323,11 @@ else:
         try:
             model_input = input_df.copy()
             model_input.columns = model_input.columns.str.strip()
+
             drop = [c for c in LEAKAGE_COLS + EXCLUDE_COLS if c in model_input.columns]
             model_input = model_input.drop(columns=drop)
+
+            model_input = add_engineered_features(model_input)
 
             probability = model.predict_proba(model_input)[0][1]
             risk_label = "High Risk" if probability >= THRESHOLD else "Low Risk"
