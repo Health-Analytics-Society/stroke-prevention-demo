@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 import streamlit as st
 
+from typing import Optional
 
 # ---------------------------------------------------------------------------
 # Paths & constants
@@ -136,10 +137,20 @@ def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
                 break
     return why_text, tips
 
+def validate_numeric_input(column_name: str, value: float) -> Optional[str]:
+    """Return a short validation message if the value is invalid."""
+    if column_name == "sleep time" and not (0 <= value <= 24):
+        return "Sleep hours must be between 0 and 24."
+    if column_name in ["Systolic blood pressure", "Diastolic blood pressure"] and value <= 0:
+        return "Blood pressure must be positive."
+    if column_name == "Waist Circumference" and value <= 0:
+        return "Waist circumference must be positive."
+    return None
 
-def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
+def build_inputs_from_schema(schema_df: pd.DataFrame) -> tuple[dict, dict]:
     """Render grouped sidebar inputs with human-readable category labels."""
     user_inputs = {}
+    validation_errors = {}
     schema_idx = schema_df.set_index("column_name").to_dict("index")
     placed = set()
 
@@ -177,17 +188,22 @@ def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
                 max_val = float(row["max"]) if pd.notna(row.get("max")) else None
                 default_val = float(row["default"]) if pd.notna(row.get("default")) else 0.0
 
-                user_inputs[col] = st.sidebar.number_input(
+                value = st.sidebar.number_input(
                     label=col,
                     min_value=min_val,
                     max_value=max_val,
                     value=default_val,
                     help=description,
                 )
+                user_inputs[col] = value
+
+                error_msg = validate_numeric_input(col, value)
+                if error_msg:
+                    validation_errors[col] = error_msg
+                    st.sidebar.warning(error_msg)
 
         st.sidebar.markdown("---")
 
-    # Catch any schema columns not in a group
     remaining = [c for c in schema_df["column_name"] if c not in placed and c in schema_idx]
     if remaining:
         st.sidebar.markdown("### Other")
@@ -195,6 +211,7 @@ def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
             row = schema_idx[col]
             input_type = row["type"]
             description = str(row.get("description", col))
+
             if input_type == "category":
                 raw_options = str(row["options"]).split("|")
                 int_options = [int(o) for o in raw_options if o.strip()]
@@ -204,15 +221,27 @@ def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
                 default_idx = int_options.index(default_val) if default_val in int_options else 0
                 selected = st.sidebar.selectbox(label=col, options=display_options, index=default_idx)
                 user_inputs[col] = int_options[display_options.index(selected)]
+
             elif input_type == "number":
                 min_val = float(row["min"]) if pd.notna(row.get("min")) else None
                 max_val = float(row["max"]) if pd.notna(row.get("max")) else None
                 default_val = float(row["default"]) if pd.notna(row.get("default")) else 0.0
-                user_inputs[col] = st.sidebar.number_input(
-                    label=col, min_value=min_val, max_value=max_val, value=default_val, help=description
-                )
 
-    return user_inputs
+                value = st.sidebar.number_input(
+                    label=col,
+                    min_value=min_val,
+                    max_value=max_val,
+                    value=default_val,
+                    help=description,
+                )
+                user_inputs[col] = value
+
+                error_msg = validate_numeric_input(col, value)
+                if error_msg:
+                    validation_errors[col] = error_msg
+                    st.sidebar.warning(error_msg)
+
+    return user_inputs, validation_errors
 
 
 def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -276,7 +305,7 @@ if schema_df.empty:
 st.sidebar.title("Health Information")
 st.sidebar.caption("Fill in the fields below, then view your risk score on the right.")
 
-user_inputs = build_inputs_from_schema(schema_df)
+user_inputs, validation_errors = build_inputs_from_schema(schema_df)
 input_df = pd.DataFrame([user_inputs])
 
 # ---------------------------------------------------------------------------
@@ -323,40 +352,41 @@ else:
         try:
             model_input = input_df.copy()
             model_input.columns = model_input.columns.str.strip()
-
             drop = [c for c in LEAKAGE_COLS + EXCLUDE_COLS if c in model_input.columns]
             model_input = model_input.drop(columns=drop)
 
             model_input = add_engineered_features(model_input)
 
-            probability = model.predict_proba(model_input)[0][1]
-            risk_label = "High Risk" if probability >= THRESHOLD else "Low Risk"
+            if validation_errors:
+                st.warning("Please fix the invalid input values before running the model.")
+            else:
+                probability = model.predict_proba(model_input)[0][1]
+                risk_label = "High Risk" if probability >= THRESHOLD else "Low Risk"
 
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                st.metric(label="Stroke Risk Score", value=f"{probability * 100:.1f}%")
-                if risk_label == "High Risk":
-                    st.error(f"⚠️ {risk_label}")
-                else:
-                    st.success(f"✅ {risk_label}")
-                st.caption(f"Threshold: {THRESHOLD} · Model output")
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    st.metric(label="Stroke Risk Score", value=f"{probability * 100:.1f}%")
+                    if risk_label == "High Risk":
+                        st.error(f"⚠️ {risk_label}")
+                    else:
+                        st.success(f"✅ {risk_label}")
+                    st.caption(f"Threshold: {THRESHOLD} · Model output")
 
-            with col2:
-                dc2_text = read_text(DC2_PATH)
-                risk_factor_key = st.selectbox(
-                    "Explore a risk factor",
-                    ["smoke", "alcohol", "sleep time", "Body Mass Index",
-                     "Systolic blood pressure", "Fasting Glucose",
-                     "Glycohemoglobin", "Dietary fiber"],
-                )
-                why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key=risk_factor_key, n=3)
-                if why_text:
-                    st.markdown(f"**Why it matters:** {why_text}")
-                if tips:
-                    st.markdown("**Prevention tips:**")
-                    for t in tips:
-                        st.markdown(f"- {t}")
-
+                with col2:
+                    dc2_text = read_text(DC2_PATH)
+                    risk_factor_key = st.selectbox(
+                        "Explore a risk factor",
+                        ["smoke", "alcohol", "sleep time", "Body Mass Index",
+                        "Systolic blood pressure", "Fasting Glucose",
+                        "Glycohemoglobin", "Dietary fiber"],
+                    )
+                    why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key=risk_factor_key, n=3)
+                    if why_text:
+                        st.markdown(f"**Why it matters:** {why_text}")
+                    if tips:
+                        st.markdown("**Prevention tips:**")
+                        for t in tips:
+                            st.markdown(f"- {t}")
         except Exception as e:
             st.error(f"Could not generate model output: {e}")
 
