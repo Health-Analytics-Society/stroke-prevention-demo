@@ -1,334 +1,201 @@
+"""
+Page 1 — Your Risk
+Entry point for the Stroke Prevention Demo Streamlit app.
+"""
+import sys
 from pathlib import Path
-import re
-from collections import OrderedDict
 
-import joblib
-import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 import streamlit as st
+from shared import (
+    DOCS_DIR,
+    EQUITY_DIR,
+    RACE_MAP,
+    INSURANCE_MAP,
+    THRESHOLD,
+    build_sidebar_inputs,
+    contribution_chart,
+    get_feature_contributions,
+    get_risk_percentile,
+    predict_risk,
+    read_text,
+    risk_gauge,
+    risk_tier,
+    scan_counterfactuals,
+    load_pipeline,
+)
 
-
-# ---------------------------------------------------------------------------
-# Paths & constants
-# ---------------------------------------------------------------------------
-DOCS_DIR  = Path(__file__).resolve().parents[1] / "docs" / "app_content"
-DC2_PATH  = DOCS_DIR / "recommended_next_steps.md"
-DC3_PATH  = DOCS_DIR / "disclaimer_and_limitations.md"
-SCHEMA_PATH = DOCS_DIR / "app_input_schema.csv"
-MODEL_PATH  = Path(__file__).resolve().parents[1] / "models" / "baseline_pipeline.joblib"
-
-LEAKAGE_COLS = [
-    "General health condition",
-    "depression",
-    "Minutes sedentary activity",
-    "Coronary Heart Disease",
-]
-
-EXCLUDE_COLS = [
-    "High-density lipoprotein",
-    "Triglyceride",
-    "Low-density lipoprotein",
-    "Total fat",
-]
-
-THRESHOLD = 0.30
-
-# Sidebar input groups — order controls display order
-SIDEBAR_GROUPS = OrderedDict([
-    ("👤 Demographics", ["gender", "age", "Race", "Marital status"]),
-    ("🏃 Lifestyle", ["alcohol", "smoke", "sleep disorder", "sleep time", "Health Insurance"]),
-    ("🩺 Clinical", [
-        "diabetes", "hypertension", "high cholesterol", "Body Mass Index",
-        "Waist Circumference", "Systolic blood pressure", "Diastolic blood pressure",
-        "Fasting Glucose", "Glycohemoglobin",
-    ]),
-    ("🥗 Diet (24-hr recall)", [
-        "energy", "protein", "Carbohydrate", "Dietary fiber",
-        "Total saturated fatty acids", "Total monounsaturated fatty acids",
-        "Total polyunsaturated fatty acids", "Potassium", "Sodium",
-    ]),
-])
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-@st.cache_data
-def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return ""
-
-
-@st.cache_data
-def load_schema(path: Path) -> pd.DataFrame:
-    try:
-        return pd.read_csv(path)
-    except FileNotFoundError:
-        return pd.DataFrame()
-
-
-@st.cache_resource
-def load_model(path: Path):
-    try:
-        return joblib.load(path)
-    except FileNotFoundError:
-        return None
-
-
-def label_map_from_description(description: str, int_options: list) -> dict:
-    """Parse '1 = Male; 2 = Female' into {1: 'Male', 2: 'Female'}."""
-    mapping = {}
-    for part in str(description).split(";"):
-        part = part.strip()
-        if "=" in part:
-            code_str, label = part.split("=", 1)
-            try:
-                mapping[int(code_str.strip())] = label.strip()
-            except ValueError:
-                pass
-    for o in int_options:
-        if o not in mapping:
-            mapping[o] = str(o)
-    return mapping
-
-
-def extract_recommended_steps(md: str, risk_factor_key: str, n: int = 3):
-    lines = md.splitlines()
-    header_pattern = re.compile(
-        rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(risk_factor_key)}`(?:\s+.*)?$"
-    )
-    start_idx = None
-    for i, line in enumerate(lines):
-        if header_pattern.match(line.strip()):
-            start_idx = i
-            break
-    if start_idx is None:
-        return None, []
-
-    end_idx = len(lines)
-    for j in range(start_idx + 1, len(lines)):
-        if lines[j].strip().startswith("## "):
-            end_idx = j
-            break
-
-    section = lines[start_idx:end_idx]
-    why_text, rec_idx = None, None
-    for i, line in enumerate(section):
-        if line.strip().startswith("**Why it matters:**"):
-            why_text = line.replace("**Why it matters:**", "").strip()
-        if "Recommended next steps" in line:
-            rec_idx = i
-            break
-
-    tips = []
-    if rec_idx is not None:
-        for line in section[rec_idx + 1:]:
-            s = line.strip()
-            if s.startswith(("## ", "**Why it matters:**")):
-                break
-            if s.startswith(("-", "*", "•")):
-                item = s.lstrip("-*•").strip()
-                if item:
-                    tips.append(item)
-            if len(tips) >= n:
-                break
-    return why_text, tips
-
-
-def build_inputs_from_schema(schema_df: pd.DataFrame) -> dict:
-    """Render grouped sidebar inputs with human-readable category labels."""
-    user_inputs = {}
-    schema_idx = schema_df.set_index("column_name").to_dict("index")
-    placed = set()
-
-    for group_label, cols in SIDEBAR_GROUPS.items():
-        group_cols = [c for c in cols if c in schema_idx]
-        if not group_cols:
-            continue
-
-        st.sidebar.markdown(f"### {group_label}")
-
-        for col in group_cols:
-            placed.add(col)
-            row = schema_idx[col]
-            input_type = row["type"]
-            description = str(row.get("description", col))
-
-            if input_type == "category":
-                raw_options = str(row["options"]).split("|")
-                int_options = [int(o) for o in raw_options if o.strip()]
-                lmap = label_map_from_description(description, int_options)
-                display_options = [lmap[o] for o in int_options]
-
-                default_val = int(row["default"]) if pd.notna(row.get("default")) else int_options[0]
-                default_idx = int_options.index(default_val) if default_val in int_options else 0
-
-                selected = st.sidebar.selectbox(
-                    label=col,
-                    options=display_options,
-                    index=default_idx,
-                )
-                user_inputs[col] = int_options[display_options.index(selected)]
-
-            elif input_type == "number":
-                min_val = float(row["min"]) if pd.notna(row.get("min")) else None
-                max_val = float(row["max"]) if pd.notna(row.get("max")) else None
-                default_val = float(row["default"]) if pd.notna(row.get("default")) else 0.0
-
-                user_inputs[col] = st.sidebar.number_input(
-                    label=col,
-                    min_value=min_val,
-                    max_value=max_val,
-                    value=default_val,
-                    help=description,
-                )
-
-        st.sidebar.markdown("---")
-
-    # Catch any schema columns not in a group
-    remaining = [c for c in schema_df["column_name"] if c not in placed and c in schema_idx]
-    if remaining:
-        st.sidebar.markdown("### Other")
-        for col in remaining:
-            row = schema_idx[col]
-            input_type = row["type"]
-            description = str(row.get("description", col))
-            if input_type == "category":
-                raw_options = str(row["options"]).split("|")
-                int_options = [int(o) for o in raw_options if o.strip()]
-                lmap = label_map_from_description(description, int_options)
-                display_options = [lmap[o] for o in int_options]
-                default_val = int(row["default"]) if pd.notna(row.get("default")) else int_options[0]
-                default_idx = int_options.index(default_val) if default_val in int_options else 0
-                selected = st.sidebar.selectbox(label=col, options=display_options, index=default_idx)
-                user_inputs[col] = int_options[display_options.index(selected)]
-            elif input_type == "number":
-                min_val = float(row["min"]) if pd.notna(row.get("min")) else None
-                max_val = float(row["max"]) if pd.notna(row.get("max")) else None
-                default_val = float(row["default"]) if pd.notna(row.get("default")) else 0.0
-                user_inputs[col] = st.sidebar.number_input(
-                    label=col, min_value=min_val, max_value=max_val, value=default_val, help=description
-                )
-
-    return user_inputs
-
-
-# ---------------------------------------------------------------------------
-# Page config & layout
-# ---------------------------------------------------------------------------
 st.set_page_config(
     page_title="Stroke Prevention Demo",
     page_icon="🧠",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-st.title("🧠 Stroke Prevention Demo")
-st.caption("Educational tool — not a clinical diagnostic. See disclaimer below.")
+# ---------------------------------------------------------------------------
+# Sidebar
+# ---------------------------------------------------------------------------
+st.sidebar.title("Health Information")
+st.sidebar.caption("Fill in your details, then explore results across all pages.")
 
+user_inputs = build_sidebar_inputs()
+
+# ---------------------------------------------------------------------------
+# Header
+# ---------------------------------------------------------------------------
+st.title("🧠 Stroke Prevention Demo")
+st.caption("Educational tool — not a clinical diagnostic. See the About page for full disclaimer.")
 st.divider()
 
-# ---------------------------------------------------------------------------
-# Sidebar inputs
-# ---------------------------------------------------------------------------
-schema_df = load_schema(SCHEMA_PATH)
-
-if schema_df.empty:
-    st.error("Input schema file is missing. Cannot build the input form.")
+if not user_inputs:
+    st.error("Could not load input schema. Check that `docs/app_content/app_input_schema.csv` exists.")
     st.stop()
 
-st.sidebar.title("Health Information")
-st.sidebar.caption("Fill in the fields below, then view your risk score on the right.")
-
-user_inputs = build_inputs_from_schema(schema_df)
-input_df = pd.DataFrame([user_inputs])
+# Warm up model quietly so all pages feel fast
+with st.spinner("Loading model..."):
+    load_pipeline()
 
 # ---------------------------------------------------------------------------
-# Results section
+# Compute risk
 # ---------------------------------------------------------------------------
-st.subheader("Your Stroke Risk Score")
+try:
+    prob = predict_risk(user_inputs)
+except Exception as e:
+    st.error(f"Model error: {e}")
+    st.stop()
 
-use_example = st.toggle("Use example output (model not required)", value=False)
+label, color, emoji = risk_tier(prob)
+percentile = get_risk_percentile(prob)
 
-if use_example:
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.metric(label="Stroke Risk Score", value="12.0%")
-        st.info("Example output")
+# ---------------------------------------------------------------------------
+# Layout
+# ---------------------------------------------------------------------------
+col_gauge, col_detail = st.columns([1, 1], gap="large")
 
-    with col2:
-        dc2_text = read_text(DC2_PATH)
-        risk_factor_key = st.selectbox(
-            "Select a risk factor to explore",
-            ["smoke", "alcohol", "sleep time", "Body Mass Index",
-             "Systolic blood pressure", "Fasting Glucose",
-             "Glycohemoglobin", "Dietary fiber"],
-        )
-        why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key=risk_factor_key, n=3)
+with col_gauge:
+    st.subheader("Your Stroke Risk Score")
+    st.plotly_chart(risk_gauge(prob), use_container_width=True)
 
-        if why_text:
-            st.markdown(f"**Why it matters:** {why_text}")
-        if tips:
-            st.markdown("**Prevention tips:**")
-            for t in tips:
-                st.markdown(f"- {t}")
-        elif not why_text:
-            st.warning("Could not load prevention tips for this risk factor.")
+    pct_text = (
+        f"You're in the **{percentile}th percentile** of stroke risk scores across "
+        f"the 4,603-patient dataset used to train this model."
+    )
+    st.caption(pct_text)
+    st.caption(
+        f"Operating threshold: {THRESHOLD*100:.0f}% · "
+        f"Low <39% · Moderate 39–62% · High >62%"
+    )
 
-else:
-    model = load_model(MODEL_PATH)
-
-    if model is None:
-        st.warning(
-            "Model file not found at `models/baseline_pipeline.joblib`. "
-            "Run the notebook top-to-bottom to train and export the pipeline, then restart the app."
+with col_detail:
+    # --- Feature contributions ---
+    st.subheader("What's Driving Your Score")
+    contributions = get_feature_contributions(user_inputs)
+    if contributions:
+        fig = contribution_chart(contributions, top_n=8)
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption(
+            "Red bars raise your risk · green bars lower it. "
+            "Heights reflect each feature's contribution to the model's log-odds output."
         )
     else:
-        try:
-            model_input = input_df.copy()
-            model_input.columns = model_input.columns.str.strip()
-            drop = [c for c in LEAKAGE_COLS + EXCLUDE_COLS if c in model_input.columns]
-            model_input = model_input.drop(columns=drop)
+        st.info("Feature contributions not available.")
 
-            probability = model.predict_proba(model_input)[0][1]
-            risk_label = "High Risk" if probability >= THRESHOLD else "Low Risk"
-
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                st.metric(label="Stroke Risk Score", value=f"{probability * 100:.1f}%")
-                if risk_label == "High Risk":
-                    st.error(f"⚠️ {risk_label}")
-                else:
-                    st.success(f"✅ {risk_label}")
-                st.caption(f"Threshold: {THRESHOLD} · Model output")
-
-            with col2:
-                dc2_text = read_text(DC2_PATH)
-                risk_factor_key = st.selectbox(
-                    "Explore a risk factor",
-                    ["smoke", "alcohol", "sleep time", "Body Mass Index",
-                     "Systolic blood pressure", "Fasting Glucose",
-                     "Glycohemoglobin", "Dietary fiber"],
-                )
-                why_text, tips = extract_recommended_steps(dc2_text, risk_factor_key=risk_factor_key, n=3)
-                if why_text:
-                    st.markdown(f"**Why it matters:** {why_text}")
-                if tips:
-                    st.markdown("**Prevention tips:**")
-                    for t in tips:
-                        st.markdown(f"- {t}")
-
-        except Exception as e:
-            st.error(f"Could not generate model output: {e}")
-
-# ---------------------------------------------------------------------------
-# Disclaimer
-# ---------------------------------------------------------------------------
 st.divider()
-st.subheader("Disclaimer")
-dc3_text = read_text(DC3_PATH)
-if dc3_text.strip():
-    st.markdown(dc3_text)
+
+# ---------------------------------------------------------------------------
+# Personalized top tip
+# ---------------------------------------------------------------------------
+st.subheader("Your Top Prevention Opportunity")
+
+cf_df = scan_counterfactuals(user_inputs)
+if not cf_df.empty:
+    best = cf_df[cf_df["risk_drop"] > 0].iloc[0]
+    new_risk = best["counterfactual_risk"]
+    new_label, new_color, new_emoji = risk_tier(new_risk)
+    drop_pp = best["risk_drop_pct"]
+
+    tip_col, arrow_col = st.columns([3, 1])
+    with tip_col:
+        st.markdown(
+            f"**{best['intervention']}**  \n"
+            f"Your risk could drop from **{prob*100:.1f}%** → **{new_risk*100:.1f}%** "
+            f"(↓ {drop_pp:.1f} percentage points).  \n"
+            f"That would move you from **{label}** to **{new_label}**."
+        )
+    with arrow_col:
+        st.metric(
+            label="Risk after intervention",
+            value=f"{new_risk*100:.1f}%",
+            delta=f"−{drop_pp:.1f}pp",
+            delta_color="inverse",
+        )
+
+    st.caption(
+        "This is a model estimate — a single feature changed, everything else held constant. "
+        "Explore all interventions on the **What If?** page."
+    )
 else:
-    st.warning("Could not load disclaimer text.")
+    st.success("All modifiable risk factors in your profile are already at healthy targets.")
+
+st.divider()
+
+# ---------------------------------------------------------------------------
+# Prevention tips (existing content)
+# ---------------------------------------------------------------------------
+st.subheader("Explore a Risk Factor")
+
+dc2_text = read_text(DOCS_DIR / "recommended_next_steps.md")
+if dc2_text:
+    import re
+
+    def extract_tips(md: str, key: str, n: int = 3):
+        lines = md.splitlines()
+        pat = re.compile(rf"^##\s*\d+\.\s*Risk factor:\s*`{re.escape(key)}`")
+        start = next((i for i, l in enumerate(lines) if pat.match(l.strip())), None)
+        if start is None:
+            return None, []
+        end = next((j for j in range(start + 1, len(lines)) if lines[j].strip().startswith("## ")), len(lines))
+        section = lines[start:end]
+        why = next((l.replace("**Why it matters:**", "").strip() for l in section if "**Why it matters:**" in l), None)
+        rec_i = next((i for i, l in enumerate(section) if "Recommended next steps" in l), None)
+        tips = []
+        if rec_i:
+            for l in section[rec_i + 1:]:
+                s = l.strip()
+                if s.startswith(("## ", "**Why")):
+                    break
+                if s.startswith(("-", "*", "•")):
+                    item = s.lstrip("-*•").strip()
+                    if item:
+                        tips.append(item)
+                if len(tips) >= n:
+                    break
+        return why, tips
+
+    risk_factor_key = st.selectbox(
+        "Select a risk factor to explore",
+        ["smoke", "alcohol", "sleep time", "Body Mass Index",
+         "Systolic blood pressure", "Fasting Glucose", "Glycohemoglobin", "Dietary fiber"],
+    )
+    why_text, tips = extract_tips(dc2_text, risk_factor_key)
+    if why_text:
+        st.markdown(f"**Why it matters:** {why_text}")
+    if tips:
+        st.markdown("**Prevention tips:**")
+        for t in tips:
+            st.markdown(f"- {t}")
+    elif not why_text:
+        st.warning("Could not load tips for this risk factor.")
+
+st.divider()
+
+# ---------------------------------------------------------------------------
+# Footer disclaimer (short)
+# ---------------------------------------------------------------------------
+with st.expander("Disclaimer & Limitations"):
+    disc = read_text(DOCS_DIR / "disclaimer_and_limitations.md")
+    if disc.strip():
+        st.markdown(disc)
+    else:
+        st.warning("Could not load disclaimer.")
