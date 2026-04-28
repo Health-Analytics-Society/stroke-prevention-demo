@@ -41,13 +41,23 @@ THRESHOLD_SCAN = [0.05, 0.10, 0.20, 0.30]
 # Relative paths from repo root
 DATA_REL_PATH = Path("data/raw/stroke_data.csv")
 REPORT_REL_PATH = Path("reports/baseline_metrics.md")
-MODEL_REL_PATH = Path("models/stroke_baseline_pipeline.joblib")
+MODEL_REL_PATH = Path("models/baseline_pipeline.joblib")
 
 # Columns to drop because they may leak post-stroke information
 LEAKAGE_COLS = [
     "General health condition",
     "depression",
     "Minutes sedentary activity",
+]
+
+# These are not collected by the Streamlit app, so the app-facing baseline
+# excludes them during training.
+EXCLUDE_COLS = [
+    "Coronary Heart Disease",
+    "High-density lipoprotein",
+    "Triglyceride",
+    "Low-density lipoprotein",
+    "Total fat",
 ]
 
 # These columns look numeric in the CSV but are actually categories
@@ -57,7 +67,7 @@ CODED_CATEGORICAL_COLS = [
     "age",
     "Race",
     "Marital status",
-    "alcohol ",
+    "alcohol",
     "smoke",
     "sleep disorder",
     "Health Insurance",
@@ -70,6 +80,7 @@ CODED_CATEGORICAL_COLS = [
 
 # Logistic regression settings
 CLASS_WEIGHT = "balanced"
+C_VALUE = 0.1
 MAX_ITER = 2000
 SOLVER = "liblinear"
 
@@ -120,6 +131,7 @@ if not DATA_PATH.exists():
     raise FileNotFoundError(f"Could not find dataset at: {DATA_PATH}")
 
 df = pd.read_csv(DATA_PATH)
+df.columns = df.columns.str.strip()
 
 if TARGET_COL not in df.columns:
     raise ValueError(f"Dataset must contain a '{TARGET_COL}' column.")
@@ -130,7 +142,7 @@ if TARGET_COL not in df.columns:
 # Drop leakage columns before splitting
 # =========================================================
 
-drop_cols = [c for c in LEAKAGE_COLS if c in df.columns]
+drop_cols = [c for c in LEAKAGE_COLS + EXCLUDE_COLS if c in df.columns]
 df_clean = df.drop(columns=drop_cols)
 
 y = df_clean[TARGET_COL]
@@ -220,6 +232,7 @@ preprocess = ColumnTransformer(
 # =========================================================
 
 model = LogisticRegression(
+    C=C_VALUE,
     max_iter=MAX_ITER,
     solver=SOLVER,
     class_weight=CLASS_WEIGHT,
@@ -256,6 +269,7 @@ accuracy = float(accuracy_score(y_test, y_pred))
 precision = float(precision_score(y_test, y_pred, zero_division=0))
 recall = float(recall_score(y_test, y_pred, zero_division=0))
 auc = float(roc_auc_score(y_test, y_prob))
+fnr = 1.0 - recall
 cm = confusion_matrix(y_test, y_pred)
 
 print()
@@ -263,6 +277,7 @@ print("Threshold", THRESHOLD)
 print("Accuracy", accuracy)
 print("Precision", precision)
 print("Recall", recall)
+print("False Negative Rate", fnr)
 print("ROC AUC", auc)
 print("Confusion matrix")
 print(cm)
@@ -321,10 +336,15 @@ for t in THRESHOLD_SCAN:
 REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 with open(REPORT_PATH, "w", encoding="utf-8") as f:
-    f.write("# Baseline Metrics (Final Demo Baseline)\n\n")
+    f.write("# Baseline Metrics\n\n")
+    f.write("This report matches the model configuration used by the Streamlit app.\n\n")
 
     f.write("## Model\n")
-    f.write("Logistic Regression\n\n")
+    f.write("Logistic Regression with L2 penalty\n\n")
+    f.write(f"- `solver`: `{SOLVER}`\n")
+    f.write(f"- `C`: `{C_VALUE}`\n")
+    f.write(f"- `class_weight`: `{CLASS_WEIGHT}`\n")
+    f.write(f"- `max_iter`: `{MAX_ITER}`\n\n")
 
     f.write("## Split\n")
     f.write(f"test_size: {TEST_SIZE}\n")
@@ -365,6 +385,7 @@ with open(REPORT_PATH, "w", encoding="utf-8") as f:
     f.write(f"Accuracy: {accuracy:.4f}\n")
     f.write(f"Precision: {precision:.4f}\n")
     f.write(f"Recall: {recall:.4f}\n")
+    f.write(f"False Negative Rate: {fnr:.4f}\n")
     f.write(f"ROC AUC: {auc:.4f}\n\n")
 
     f.write("## Confusion matrix on test set\n")
@@ -385,6 +406,13 @@ with open(REPORT_PATH, "w", encoding="utf-8") as f:
             f"recall={row['recall']:.4f} | "
             f"cm={row['confusion_matrix']}\n"
         )
+    f.write("\n")
+    f.write("## Interpretation\n\n")
+    f.write(
+        "This is a recall-oriented educational baseline, not a clinical model. "
+        "At the 0.30 operating threshold it catches most held-out stroke cases, "
+        "but it also creates many false positives and has weak discrimination overall.\n"
+    )
 
 print()
 print(f"Saved report to {REPORT_PATH}")

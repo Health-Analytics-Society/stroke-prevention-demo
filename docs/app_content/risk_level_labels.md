@@ -12,11 +12,11 @@ Reported in `reports/baseline_metrics.md`:
 
 | Statistic | Score |
 |---|---|
-| Minimum | 0.008 |
-| 50th percentile (median) | 0.389 |
-| 80th percentile | 0.618 |
-| 95th percentile | 0.772 |
-| Maximum | 0.925 |
+| Minimum | 0.015 |
+| 50th percentile (median) | 0.419 |
+| 80th percentile | 0.622 |
+| 95th percentile | 0.743 |
+| Maximum | 0.905 |
 
 ---
 
@@ -24,8 +24,8 @@ Reported in `reports/baseline_metrics.md`:
 
 | Level | Score range | Plain-language label | Color (suggested) |
 |---|---|---|---|
-| Low | < 0.39 | Lower relative risk | Green |
-| Moderate | 0.39 – 0.62 | Moderate relative risk | Yellow / Amber |
+| Low | < 0.42 | Lower relative risk | Green |
+| Moderate | 0.42 – 0.62 | Moderate relative risk | Yellow / Amber |
 | High | > 0.62 | Higher relative risk | Red |
 
 ### Rationale for the cutoffs
