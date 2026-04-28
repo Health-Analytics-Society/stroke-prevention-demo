@@ -11,7 +11,7 @@ We are using Python + `venv`.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ````
 
 ### Windows (PowerShell)
@@ -21,7 +21,7 @@ py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 ## What counts as done

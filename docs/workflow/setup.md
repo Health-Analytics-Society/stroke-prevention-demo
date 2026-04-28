@@ -91,7 +91,7 @@ Run all commands from `stroke-prevention-demo/`, not from inside a subfolder.
 **Example — launch the app:**
 
 ```bash
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 **Example — run a script:**

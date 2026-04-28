@@ -1,5 +1,5 @@
 """
-Page 1 — Your Risk
+Page 1 — Stroke Model
 Entry point for the Stroke Prevention Demo Streamlit app.
 """
 import sys
@@ -24,7 +24,7 @@ from shared import (
 )
 
 st.set_page_config(
-    page_title="Stroke Prevention Demo",
+    page_title="Stroke Model",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -41,8 +41,8 @@ user_inputs = build_sidebar_inputs()
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-st.title("🧠 Stroke Prevention Demo")
-st.caption("Educational tool — not a clinical diagnostic. See the About page for full disclaimer.")
+st.title("🧠 Stroke Model")
+st.caption("Modeling page for the Stroke Prevention Demo — not a clinical diagnostic. See the About page for full disclaimer.")
 st.divider()
 
 if not user_inputs:

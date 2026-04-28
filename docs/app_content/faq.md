@@ -146,7 +146,7 @@ No. This tool is not a substitute for professional medical care. See `docs/app_c
 
 ### Where can I find the source code?
 
-The source code lives in the GitHub repository associated with this project. The main app file is `app/streamlit_app.py` and the training notebook is `notebooks/final_demo_baseline_model.ipynb`.
+The source code lives in the GitHub repository associated with this project. The main modeling page is `app/Stroke_Model.py`, and the reproducible training script is `src/train_baseline.py`.
 
 ### How do I run the app locally?
 
@@ -155,7 +155,7 @@ The source code lives in the GitHub repository associated with this project. The
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 **Windows PowerShell:**
@@ -163,7 +163,7 @@ streamlit run app/streamlit_app.py
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 ### How do I contribute or report an issue?

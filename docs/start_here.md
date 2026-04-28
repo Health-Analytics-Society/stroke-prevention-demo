@@ -1,8 +1,8 @@
 # Start Here
 
-This repository contains an educational Streamlit dashboard for exploring stroke
-risk prediction, prevention scenarios, and fairness limitations with public
-health data.
+This repository contains the Stroke Prevention Demo, an educational Streamlit
+dashboard for exploring stroke risk prediction, prevention scenarios, and
+fairness limitations with public health data.
 
 ## Run the App
 
@@ -10,10 +10,10 @@ health data.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
-The app entry point is `app/streamlit_app.py`.
+The app entry point is `app/Stroke_Model.py`.
 
 ## Repository Map
 

@@ -11,6 +11,7 @@ tool.
 ## What Is Included
 
 - Multi-page Streamlit app in `app/`
+- Main modeling page labeled **Stroke Model**
 - Reproducible baseline model training from `data/raw/stroke_data.csv`
 - App copy, disclaimers, and input schema in `docs/app_content/`
 - Supporting model reports in `reports/`
@@ -24,7 +25,7 @@ Use Python 3.10 or newer.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 Windows PowerShell:
@@ -33,7 +34,7 @@ Windows PowerShell:
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+streamlit run app/Stroke_Model.py
 ```
 
 The app trains the baseline model once at startup from the checked-in CSV. A
