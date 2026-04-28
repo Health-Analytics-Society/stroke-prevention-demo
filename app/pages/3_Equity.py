@@ -30,36 +30,36 @@ st.sidebar.caption("Your Race and Insurance inputs are used for the personalized
 user_inputs = build_sidebar_inputs()
 
 # ---------------------------------------------------------------------------
-# Pre-computed metrics from health_equity_analysis.ipynb
-# (test set n=921, seed=42, threshold=0.30, C=0.1 logistic regression)
+# Pre-computed metrics for the app's baseline model.
+# Test set n=921, seed=42, threshold=0.30, C=0.1 logistic regression.
 # ---------------------------------------------------------------------------
 
 # False Negative Rate: probability a REAL stroke case is missed by the model
 RACE_FNR = {
     1: 0.333,  # Mexican American
-    2: 0.667,  # Other Hispanic
-    3: 0.068,  # Non-Hispanic White
+    2: 0.333,  # Other Hispanic
+    3: 0.045,  # Non-Hispanic White
     4: 0.167,  # Non-Hispanic Black
     5: 0.000,  # Other/Multiracial (n=49, interpret carefully)
 }
 
 RACE_AUC = {
-    1: 0.544,
-    2: 0.381,
-    3: 0.611,
-    4: 0.585,
-    5: 0.856,
+    1: 0.537,
+    2: 0.310,
+    3: 0.604,
+    4: 0.559,
+    5: 0.839,
 }
 
 RACE_N = {1: 105, 2: 101, 3: 467, 4: 199, 5: 49}
 RACE_STROKE_CASES = {1: 9, 2: 3, 3: 44, 4: 12, 5: 4}
 
-INS_FNR  = {1: 0.092, 2: 0.571}
-INS_AUC  = {1: 0.610, 2: 0.507}
+INS_FNR  = {1: 0.062, 2: 0.571}
+INS_AUC  = {1: 0.596, 2: 0.502}
 INS_N    = {1: 801, 2: 120}
 
-OVERALL_FNR = 0.139
-OVERALL_AUC = 0.611
+OVERALL_FNR = 0.111
+OVERALL_AUC = 0.600
 
 # ---------------------------------------------------------------------------
 # Header
@@ -170,12 +170,12 @@ fig_fnr.update_layout(
     margin=dict(l=20, r=20, t=30, b=20),
     xaxis_tickangle=-20,
 )
-st.plotly_chart(fig_fnr, use_container_width=True)
+st.plotly_chart(fig_fnr, width="stretch")
 
 st.caption(
-    f"The gap between the best (Non-Hispanic White, FNR 6.8%) and worst (Other Hispanic, FNR 66.7%) "
-    f"groups is **59.9 percentage points**. A Hispanic patient with a stroke is ~10× as likely "
-    f"to be told 'low risk' as a Non-Hispanic White patient."
+    "The largest observed race/ethnicity FNR gap is **33.3 percentage points**. "
+    "The Hispanic subgroup estimates are based on small stroke-case counts, so the exact "
+    "percentage is unstable, but the reliability concern is material."
 )
 
 # ---------------------------------------------------------------------------
@@ -215,11 +215,11 @@ fig_auc.update_layout(
     margin=dict(l=20, r=20, t=30, b=20),
     xaxis_tickangle=-20,
 )
-st.plotly_chart(fig_auc, use_container_width=True)
+st.plotly_chart(fig_auc, width="stretch")
 st.caption(
-    "Other Hispanic AUC = 0.381 — *below random chance*. The model is less useful "
-    "than flipping a coin for this group. This is primarily driven by underrepresentation: "
-    "this group makes up only 9.7% of the training data."
+    "Other Hispanic AUC = 0.310 — below random chance on this split. "
+    "This is a small subgroup with only three stroke cases in the test set, so the "
+    "number should be interpreted as a warning flag rather than a precise estimate."
 )
 
 st.divider()
@@ -253,7 +253,7 @@ with col_ifnr:
         height=320,
         margin=dict(l=10, r=10, t=40, b=20),
     )
-    st.plotly_chart(fig_i, use_container_width=True)
+    st.plotly_chart(fig_i, width="stretch")
 
 with col_iauc:
     fig_ia = go.Figure(go.Bar(
@@ -274,11 +274,11 @@ with col_iauc:
         height=320,
         margin=dict(l=10, r=10, t=40, b=20),
     )
-    st.plotly_chart(fig_ia, use_container_width=True)
+    st.plotly_chart(fig_ia, width="stretch")
 
 st.error(
-    "**The uninsured FNR gap is 47.9 percentage points** (9.2% insured vs 57.1% uninsured). "
-    "For uninsured patients, the model's AUC is 0.507 — essentially random. "
+    "**The uninsured FNR gap is 50.9 percentage points** (6.2% insured vs 57.1% uninsured). "
+    "For uninsured patients, the model's AUC is 0.502 — essentially random. "
     "These are the patients who can least afford a missed diagnosis, and the model is least reliable for them."
 )
 
@@ -296,7 +296,7 @@ score_dist_path = EQUITY_DIR / "score_distribution_by_race.png"
 race_chart_path = EQUITY_DIR / "race_stratified_metrics.png"
 
 if score_dist_path.exists():
-    st.image(str(score_dist_path), use_column_width=True)
+    st.image(str(score_dist_path), width="stretch")
     st.caption(
         "For Non-Hispanic White patients, stroke cases (red) spread broadly above 0.30 — easy to flag. "
         "For Hispanic groups, stroke cases cluster near or below the threshold — systematically missed."
@@ -305,7 +305,7 @@ else:
     st.info("Run `extra_analysis/health_equity/health_equity_analysis.ipynb` to generate charts.")
 
 if race_chart_path.exists():
-    st.image(str(race_chart_path), use_column_width=True)
+    st.image(str(race_chart_path), width="stretch")
 
 # ---------------------------------------------------------------------------
 # Why does this happen?
@@ -371,7 +371,7 @@ with st.expander("Full stratified metrics table"):
         "FNR": f"{OVERALL_FNR:.1%}",
         "FNR vs. overall": "—",
     })
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
     st.caption(
         "Source: `extra_analysis/health_equity/health_equity_analysis.ipynb`. "
         "Test set n=921, stratified split (seed=42), threshold=0.30, C=0.1 logistic regression."

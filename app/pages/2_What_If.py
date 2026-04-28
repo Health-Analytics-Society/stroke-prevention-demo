@@ -8,15 +8,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from shared import (
     MODIFIABLE_FEATURES,
-    _LOWER_IS_BETTER,
-    _HIGHER_IS_BETTER,
     build_sidebar_inputs,
-    contribution_chart,
     predict_risk,
     risk_gauge,
     risk_tier,
@@ -82,9 +78,36 @@ NUM_FEATURES = {
     "Sodium":                   {"label": "Sodium (mg/day)",        "min": 300, "max": 6000,"step": 50,  "healthy": 2300},
 }
 
+# Keep intervention controls tied to the current sidebar profile. Without this,
+# Streamlit preserves old What If values after a user changes the baseline.
+profile_signature = tuple(sorted(user_inputs.items()))
+if st.session_state.get("cf_profile_signature") != profile_signature:
+    for feat in list(CAT_FEATURES) + list(NUM_FEATURES):
+        st.session_state.pop(f"cf_{feat}", None)
+    st.session_state["cf_profile_signature"] = profile_signature
+    st.session_state["cf_best_case_applied"] = False
+
+
+def apply_best_case() -> None:
+    for feat, healthy_val, _ in MODIFIABLE_FEATURES:
+        key = f"cf_{feat}"
+        if feat in CAT_FEATURES:
+            st.session_state[key] = CAT_FEATURES[feat]["options"][healthy_val]
+        elif feat in NUM_FEATURES:
+            st.session_state[key] = float(healthy_val)
+    st.session_state["cf_best_case_applied"] = True
+
+
 overrides: dict = dict(user_inputs)
 
 st.subheader("Adjust Clinical & Lifestyle Factors")
+st.button(
+    "🎯 Show Best Case — set all to healthy targets",
+    type="secondary",
+    on_click=apply_best_case,
+)
+if st.session_state.get("cf_best_case_applied"):
+    st.info("Controls below are set to healthy target values for the best-case scenario.")
 
 cat_col, num_col = st.columns(2, gap="large")
 
@@ -123,16 +146,6 @@ with num_col:
             help=f"Healthy target: {cfg['healthy']}",
         )
 
-# "Best Case" button
-if st.button("🎯 Show Best Case — set all to healthy targets", type="secondary"):
-    for feat, healthy_val, _ in MODIFIABLE_FEATURES:
-        if feat in overrides:
-            overrides[feat] = healthy_val
-    st.info(
-        "Sliders and selects above now show healthy values. "
-        "The gauges below reflect the best-case scenario."
-    )
-
 adjusted_risk = predict_risk(overrides)
 a_label, a_color, _ = risk_tier(adjusted_risk)
 delta_pp = (baseline_risk - adjusted_risk) * 100
@@ -148,14 +161,14 @@ g_left, g_right, g_delta = st.columns([2, 2, 1])
 with g_left:
     st.plotly_chart(
         risk_gauge(baseline_risk, "Baseline Risk"),
-        use_container_width=True,
+        width="stretch",
         key="gauge_before",
     )
 
 with g_right:
     st.plotly_chart(
         risk_gauge(adjusted_risk, "Adjusted Risk"),
-        use_container_width=True,
+        width="stretch",
         key="gauge_after",
     )
 
@@ -214,7 +227,7 @@ if not cf_df.empty:
             xaxis=dict(range=[0, positive_sorted["risk_drop_pct"].max() * 1.3]),
             yaxis=dict(automargin=True),
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         best_combo = dict(user_inputs)
         for _, row in cf_df[cf_df["risk_drop"] > 0].iterrows():

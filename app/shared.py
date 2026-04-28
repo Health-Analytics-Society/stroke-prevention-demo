@@ -1,9 +1,9 @@
 """
 shared.py — Central helpers for all Streamlit pages.
 
-All pages import from here. The model is retrained once at startup
-(avoids sklearn version incompatibilities with the saved .joblib).
-Training takes <1 second.
+The demo trains a deterministic baseline model once per Streamlit process from
+the checked-in source data. This avoids shipping a brittle sklearn pickle while
+keeping the app reproducible for local and hosted runs.
 """
 from collections import OrderedDict
 from pathlib import Path
@@ -53,7 +53,7 @@ CATEGORICAL_COLS = [
 ]
 
 # Risk tier thresholds (from docs/app_content/risk_level_labels.md)
-TIER_LOW_MAX = 0.39
+TIER_LOW_MAX = 0.42
 TIER_HIGH_MIN = 0.62
 
 RACE_MAP = {
@@ -64,6 +64,36 @@ RACE_MAP = {
     5: "Other/Multiracial",
 }
 INSURANCE_MAP = {1: "Insured", 2: "Uninsured"}
+
+FEATURE_LABELS = {
+    "gender": "Gender",
+    "age": "Age group",
+    "Race": "Race/ethnicity",
+    "Marital status": "Marital status",
+    "alcohol": "Alcohol use",
+    "smoke": "Smoking",
+    "sleep disorder": "Sleep disorder",
+    "Health Insurance": "Insurance status",
+    "diabetes": "Diabetes",
+    "hypertension": "Hypertension",
+    "high cholesterol": "High cholesterol",
+    "Body Mass Index": "BMI category",
+    "sleep time": "Sleep time",
+    "Waist Circumference": "Waist circumference",
+    "Systolic blood pressure": "Systolic blood pressure",
+    "Diastolic blood pressure": "Diastolic blood pressure",
+    "Fasting Glucose": "Fasting glucose",
+    "Glycohemoglobin": "HbA1c",
+    "energy": "Energy intake",
+    "protein": "Protein intake",
+    "Carbohydrate": "Carbohydrate intake",
+    "Dietary fiber": "Dietary fiber",
+    "Total saturated fatty acids": "Saturated fat",
+    "Total monounsaturated fatty acids": "Monounsaturated fat",
+    "Total polyunsaturated fatty acids": "Polyunsaturated fat",
+    "Potassium": "Potassium",
+    "Sodium": "Sodium",
+}
 
 SIDEBAR_GROUPS = OrderedDict([
     ("👤 Demographics", ["gender", "age", "Race", "Marital status"]),
@@ -108,7 +138,7 @@ def read_text(path: Path) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Model — retrained at startup to avoid sklearn version mismatch
+# Model — retrained at startup from the source data
 # ---------------------------------------------------------------------------
 
 @st.cache_resource
@@ -174,7 +204,7 @@ def risk_tier(prob: float) -> tuple:
 
 @st.cache_data
 def _all_dataset_scores() -> np.ndarray:
-    """Precompute risk scores for all 4,603 patients (for percentile lookup)."""
+    """Precompute risk scores for all 4,603 source rows (for percentile lookup)."""
     pipeline = load_pipeline()
     df = load_data()
     drop_cols = [c for c in LEAKAGE_COLS + EXCLUDE_COLS + [TARGET_COL] if c in df.columns]
@@ -225,6 +255,7 @@ def get_feature_contributions(input_dict: dict) -> list[tuple]:
             original = fname[len("num__"):]
         else:
             original = fname
+        original = FEATURE_LABELS.get(original, original)
         grouped[original] = grouped.get(original, 0.0) + float(contrib)
 
     return sorted(grouped.items(), key=lambda x: abs(x[1]), reverse=True)

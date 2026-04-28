@@ -1,16 +1,19 @@
-# Baseline Metrics (Final Demo Baseline)
+# Baseline Metrics
+
+This report matches the model configuration used by the Streamlit app.
 
 ## Model
-Logistic Regression with Elastic Net (penalty=elasticnet, C=1, l1_ratio=0.5, solver=saga)
+Logistic Regression with L2 penalty
 
-## Evaluation
-method: stratified_k_fold_cv
-folds: 5
-shuffle: yes
+- `solver`: `liblinear`
+- `C`: `0.1`
+- `class_weight`: `balanced`
+- `max_iter`: `2000`
+
+## Split
+test_size: 0.2
 random_state: 42
 stratify: yes
-outlier_clipping: yes
-clip_iqr_multiplier: 2.0
 
 ## Leakage handling
 Dropped columns
@@ -18,6 +21,39 @@ Dropped columns
 - depression
 - Minutes sedentary activity
 - Coronary Heart Disease
+- High-density lipoprotein
+- Triglyceride
+- Low-density lipoprotein
+- Total fat
+
+## Feature columns used by the pipeline
+- gender
+- age
+- Race
+- Marital status
+- alcohol
+- smoke
+- sleep disorder
+- Health Insurance
+- sleep time
+- diabetes
+- hypertension
+- high cholesterol
+- Body Mass Index
+- Waist Circumference
+- Systolic blood pressure
+- Diastolic blood pressure
+- Fasting Glucose
+- Glycohemoglobin
+- energy
+- protein
+- Carbohydrate
+- Dietary fiber
+- Total saturated fatty acids
+- Total monounsaturated fatty acids
+- Total polyunsaturated fatty acids
+- Potassium
+- Sodium
 
 ## Threshold
 threshold: 0.3
@@ -28,35 +64,36 @@ stroke
 0    4241
 1     362
 
-## Metrics from 5-fold stratified CV (out-of-fold)
-Accuracy: 0.3483
-Precision: 0.0993
-Recall: 0.9033
-ROC AUC: 0.6759
+Proportions
+stroke
+0    0.921356
+1    0.078644
 
-## Confusion matrix from 5-fold stratified CV (out-of-fold)
-Format is [[TN FP]
-           [FN TP]]
+## Metrics on test set
+Accuracy: 0.3561
+Precision: 0.0986
+Recall: 0.8889
+False Negative Rate: 0.1111
+ROC AUC: 0.5995
 
-[[1276 2965]
- [  35  327]]
+## Confusion matrix on test set
+Format is [[TN, FP], [FN, TP]]
 
-## Per-fold metrics
-- fold=1 | n=921 | positives=72 | accuracy=0.3616 | precision=0.1067 | recall=0.9722 | auc=0.6975 | clipped_values=1872
-- fold=2 | n=921 | positives=73 | accuracy=0.3626 | precision=0.1046 | recall=0.9315 | auc=0.7022 | clipped_values=1859
-- fold=3 | n=921 | positives=73 | accuracy=0.3464 | precision=0.0998 | recall=0.9041 | auc=0.6442 | clipped_values=1883
-- fold=4 | n=920 | positives=72 | accuracy=0.3391 | precision=0.0939 | recall=0.8611 | auc=0.6373 | clipped_values=1912
-- fold=5 | n=920 | positives=72 | accuracy=0.3315 | precision=0.0917 | recall=0.8472 | auc=0.6978 | clipped_values=1895
+[[264, 585], [8, 64]]
 
-## Score cutoffs from CV out-of-fold probabilities
-- min: 0.016345
-- median_p50: 0.437170
-- p80: 0.625333
-- p95: 0.751644
-- max: 0.910096
+## Score cutoffs from test set probabilities
+- min: 0.014779
+- median_p50: 0.419332
+- p80: 0.622469
+- p95: 0.743040
+- max: 0.904589
 
-## Threshold scan (CV out-of-fold)
-- threshold=0.05 | precision=0.0792 | recall=0.9972 | cm=[[45, 4196], [1, 361]]
-- threshold=0.10 | precision=0.0811 | recall=0.9945 | cm=[[161, 4080], [2, 360]]
-- threshold=0.20 | precision=0.0892 | recall=0.9779 | cm=[[627, 3614], [8, 354]]
-- threshold=0.30 | precision=0.0993 | recall=0.9033 | cm=[[1276, 2965], [35, 327]]
+## Threshold scan
+- threshold=0.05 | precision=0.0786 | recall=1.0000 | cm=[[5, 844], [0, 72]]
+- threshold=0.10 | precision=0.0795 | recall=0.9722 | cm=[[38, 811], [2, 70]]
+- threshold=0.20 | precision=0.0883 | recall=0.9444 | cm=[[147, 702], [4, 68]]
+- threshold=0.30 | precision=0.0986 | recall=0.8889 | cm=[[264, 585], [8, 64]]
+
+## Interpretation
+
+This is a recall-oriented educational baseline, not a clinical model. At the 0.30 operating threshold it catches most held-out stroke cases, but it also creates many false positives and has weak discrimination overall.

@@ -10,9 +10,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import streamlit as st
 from shared import (
     DOCS_DIR,
-    EQUITY_DIR,
-    RACE_MAP,
-    INSURANCE_MAP,
     THRESHOLD,
     build_sidebar_inputs,
     contribution_chart,
@@ -75,7 +72,7 @@ col_gauge, col_detail = st.columns([1, 1], gap="large")
 
 with col_gauge:
     st.subheader("Your Stroke Risk Score")
-    st.plotly_chart(risk_gauge(prob), use_container_width=True)
+    st.plotly_chart(risk_gauge(prob), width="stretch")
 
     pct_text = (
         f"You're in the **{percentile}th percentile** of stroke risk scores across "
@@ -84,7 +81,7 @@ with col_gauge:
     st.caption(pct_text)
     st.caption(
         f"Operating threshold: {THRESHOLD*100:.0f}% · "
-        f"Low <39% · Moderate 39–62% · High >62%"
+        f"Low <42% · Moderate 42–62% · High >62%"
     )
 
 with col_detail:
@@ -93,7 +90,7 @@ with col_detail:
     contributions = get_feature_contributions(user_inputs)
     if contributions:
         fig = contribution_chart(contributions, top_n=8)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         st.caption(
             "Red bars raise your risk · green bars lower it. "
             "Heights reflect each feature's contribution to the model's log-odds output."
@@ -109,8 +106,9 @@ st.divider()
 st.subheader("Your Top Prevention Opportunity")
 
 cf_df = scan_counterfactuals(user_inputs)
-if not cf_df.empty:
-    best = cf_df[cf_df["risk_drop"] > 0].iloc[0]
+positive_cf = cf_df[cf_df["risk_drop"] > 0] if not cf_df.empty else cf_df
+if not positive_cf.empty:
+    best = positive_cf.iloc[0]
     new_risk = best["counterfactual_risk"]
     new_label, new_color, new_emoji = risk_tier(new_risk)
     drop_pp = best["risk_drop_pct"]
@@ -136,7 +134,10 @@ if not cf_df.empty:
         "Explore all interventions on the **What If?** page."
     )
 else:
-    st.success("All modifiable risk factors in your profile are already at healthy targets.")
+    st.success(
+        "The single-factor scenarios did not identify a risk-lowering change from the "
+        "modifiable targets in this profile."
+    )
 
 st.divider()
 

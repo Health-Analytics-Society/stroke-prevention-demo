@@ -77,7 +77,7 @@ with tab_model:
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("""
-**Algorithm:** Logistic Regression (Elastic Net penalty)
+**Algorithm:** Logistic Regression (L2 penalty)
 - Solver: `liblinear`
 - Regularization: C = 0.1
 - Class weighting: `balanced` (to handle 12:1 class imbalance)
@@ -96,10 +96,10 @@ with tab_model:
 **Overall Performance (test set, n=921):**
 | Metric | Value |
 |--------|-------|
-| ROC AUC | 0.611 |
-| Recall (sensitivity) | 0.861 |
-| Precision | 0.101 |
-| False Negative Rate | 13.9% |
+| ROC AUC | 0.600 |
+| Recall (sensitivity) | 0.889 |
+| Precision | 0.099 |
+| False Negative Rate | 11.1% |
 | Operating threshold | 0.30 |
 
 **Intended use:** Education, demonstration, health data literacy.
@@ -143,7 +143,7 @@ with tab_model:
     st.markdown("---")
     st.markdown("""
 **Preprocessing:**
-- Categorical columns: median imputation then one-hot encoding
+- Categorical columns: most-frequent imputation then one-hot encoding
 - Numeric columns: median imputation then standard scaling
 - Leakage columns removed from training: *General health condition*, *Depression*, *Minutes sedentary activity*
 - Columns not collected in app removed: *Coronary Heart Disease*, *HDL*, *LDL*, *Triglycerides*, *Total fat*
@@ -151,7 +151,7 @@ with tab_model:
 **Fairness note:**
 Performance varies significantly across racial/ethnic groups and insurance status.
 See the "Is This Tool Fair?" page for full stratified evaluation.
-Overall AUC hides a 0.381–0.856 range across subgroups.
+Overall AUC hides a 0.310–0.839 range across subgroups.
 The model should not be considered equally reliable for all populations.
     """)
 

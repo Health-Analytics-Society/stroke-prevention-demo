@@ -8,13 +8,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
 import streamlit as st
 from shared import (
-    INSURANCE_MAP,
-    RACE_MAP,
     build_sidebar_inputs,
     load_data,
 )
@@ -150,7 +146,7 @@ if col_name in df.columns:
         margin=dict(l=20, r=20, t=30, b=20),
         xaxis_tickangle=-20,
     )
-    st.plotly_chart(fig_cat, use_container_width=True)
+    st.plotly_chart(fig_cat, width="stretch")
 
     st.caption(
         f"Red = above 120% of overall rate ({overall_rate:.1f}%) · "
@@ -220,7 +216,7 @@ if feat_col in df.columns:
     fig_dist.add_vline(x=mean_no, line_dash="dash", line_color="steelblue",
                        annotation_text=f"No stroke mean: {mean_no:.1f}", annotation_position="top left")
 
-    st.plotly_chart(fig_dist, use_container_width=True)
+    st.plotly_chart(fig_dist, width="stretch")
     st.caption(
         f"Mean {chosen_num}: **stroke cases = {mean_yes:.1f}**, **non-stroke = {mean_no:.1f}**. "
         f"Wider separation = stronger signal for the model. "
@@ -288,7 +284,7 @@ if cond_a in df.columns and cond_b in df.columns:
         xaxis_title=cond_b_label,
         yaxis_title=cond_a_label,
     )
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_heat, width="stretch")
 
     max_risk = z.max()
     min_risk = z.min()

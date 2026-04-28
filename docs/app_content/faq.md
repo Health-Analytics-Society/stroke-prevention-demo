@@ -52,8 +52,8 @@ These labels group your score into three bands based on where it falls compared 
 
 | Label | Score range | Meaning |
 |---|---|---|
-| Low | Below ~0.39 (below median) | Fewer co-occurring risk factors relative to the dataset |
-| Moderate | ~0.39 – ~0.62 (median to 80th percentile) | Several risk factors present |
+| Low | Below ~0.42 (below median) | Fewer co-occurring risk factors relative to the dataset |
+| Moderate | ~0.42 – ~0.62 (median to 80th percentile) | Several risk factors present |
 | High | Above ~0.62 (top 20%) | Multiple high-weight risk factors active in your profile |
 
 See `docs/app_content/risk_level_labels.md` for full details and display copy.
@@ -79,8 +79,9 @@ The model is a logistic regression trained on an NHANES-derived dataset:
 - **Class imbalance handling:** `class_weight="balanced"` (the model is penalized more for missing stroke cases)
 - **Threshold:** 0.30 (scores at or above 0.30 are flagged as high risk for yes/no output; the continuous score is always shown)
 - **Leakage columns excluded:** `General health condition`, `depression`, `Minutes sedentary activity` (these can reflect post-stroke consequences rather than pre-stroke risk)
+- **App-only exclusions:** `Coronary Heart Disease`, lipid panel columns, and `Total fat` are excluded because the app does not collect them
 
-Full details: `reports/baseline_metrics.md` and `notebooks/final_demo_baseline_model.ipynb`.
+Full details: `reports/baseline_metrics.md` and `src/train_baseline.py`.
 
 ### How accurate is the model?
 
@@ -88,14 +89,14 @@ On the held-out test set (at the 0.30 threshold):
 
 | Metric | Value |
 |---|---|
-| ROC AUC | 0.61 |
-| Recall (sensitivity) | 0.86 |
+| ROC AUC | 0.60 |
+| Recall (sensitivity) | 0.89 |
 | Precision | 0.10 |
-| Accuracy | 0.41 |
+| Accuracy | 0.36 |
 
-ROC AUC of 0.61 means the model ranks a randomly chosen stroke case above a randomly chosen non-stroke case about 61% of the time — slightly better than random (0.50) but far below clinical-grade tools. This is a baseline model and has not been optimized or externally validated.
+ROC AUC of 0.60 means the model ranks a randomly chosen stroke case above a randomly chosen non-stroke case about 60% of the time — slightly better than random (0.50) but far below clinical-grade tools. This is a baseline model and has not been optimized or externally validated.
 
-Recall (0.86) is high because the model was tuned to catch stroke cases even at the cost of more false alarms. This is intentional for a prevention demo — missing a true case is treated as worse than a false alarm.
+Recall (0.89) is high because the model was tuned to catch stroke cases even at the cost of more false alarms. This is intentional for a prevention demo — missing a true case is treated as worse than a false alarm.
 
 ### Why were "General health condition," "depression," and "Minutes sedentary activity" left out?
 

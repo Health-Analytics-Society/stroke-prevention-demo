@@ -1,97 +1,59 @@
 # Project State
 
-Last updated: Week 04 (February 2026)
+Last updated: April 28, 2026
 
-This file reflects where the project currently stands. Update it when major milestones complete.
+## Current Phase
 
----
+**Demo-ready for educational use.**
 
-## Current phase
+The Streamlit app is wired end-to-end: sidebar inputs feed the baseline model,
+the main page explains the score, the What If page runs counterfactual scenarios,
+the Equity page shows subgroup performance, and the About page includes the
+model card, data source notes, FAQ, and disclaimer.
 
-**Active development — baseline complete, polish + app wiring next.**
+This project is not production-ready for clinical or regulated healthcare use.
+It is ready to present as an educational dashboard and public health analytics
+demo.
 
-We have a working end-to-end pipeline (data → model → metrics). The next phase is improving the model, wiring outputs into the app, and finishing content.
-
----
-
-## What is done
-
-| Area | Status | Notes |
-|---|---|---|
-| Dataset selected | ✅ Done | NHANES-derived stroke dataset |
-| Data dictionary | ✅ Done | `docs/reference/data_dictionary.md` |
-| Leakage candidates | ✅ Done | `docs/reference/leakage_candidates.md` |
-| Baseline model | ✅ Done | Logistic regression, see `reports/baseline_metrics.md` |
-| Baseline EDA notebook | ✅ Done | `notebooks/example_quick_eda.ipynb` |
-| Baseline training notebook | ✅ Done | `notebooks/train_baseline.ipynb` |
-| Weekly recaps (Weeks 0–4) | ✅ Done | `docs/reference/recaps/` |
-| Workflow docs | ✅ Done | `docs/workflow/` |
-| App scaffold | ✅ Done | `app/streamlit_app.py` (placeholder, not wired to model) |
-
----
-
-## What is in progress
+## Completed Scope
 
 | Area | Status | Notes |
 |---|---|---|
-| Data sanity check notebook | 🔄 In progress | Started Week 04, not fully finished |
-| App content (labels, tips, disclaimers) | 🔄 In progress | Stubs created in `docs/app_content/`, not finalized |
+| Dataset | Done | NHANES-derived stroke dataset in `data/raw/stroke_data.csv` |
+| App | Done | Multi-page Streamlit app in `app/` |
+| Baseline model | Done | Logistic regression trained at app startup from source data |
+| Metrics | Done | App-facing baseline metrics in `reports/baseline_metrics.md` |
+| App content | Done | FAQ, risk labels, disclaimer, and next steps in `docs/app_content/` |
+| Equity analysis | Done | Subgroup charts and findings in `extra_analysis/health_equity/` |
+| Workflow docs | Done | Contributor setup and workflow docs retained in `docs/workflow/` |
 
----
+## Current App Model
 
-## What is not started yet
+- **Model:** Logistic Regression, L2 penalty
+- **Regularization:** `C=0.1`
+- **Class weighting:** `balanced`
+- **Split for reported metrics:** 80/20 stratified split, `random_state=42`
+- **Operating threshold:** `0.30`
+- **Held-out ROC AUC:** `0.600`
+- **Held-out recall:** `0.889`
+- **Held-out precision:** `0.099`
 
-| Area | Notes |
-|---|---|
-| Model improvement | Baseline has ROC AUC ~0.60 and predicts all-negative (class imbalance not addressed yet) |
-| Feature selection | Leakage candidates identified but not yet formally dropped in pipeline |
-| App wiring | Model not connected to Streamlit input form yet |
-| Risk score output UI | Risk level labels and next-steps copy not integrated into app |
-| Presentation | Final deliverable not started |
+The model is intentionally recall-oriented for demonstration purposes. It should
+not be interpreted as clinically reliable.
 
----
+## Known Limitations
 
-## Baseline model summary
+- The dataset is cross-sectional and includes self-reported stroke history.
+- The baseline model has weak discrimination and many false positives.
+- Subgroup performance varies materially by race/ethnicity and insurance status.
+- The app excludes features that are not collected in the sidebar form.
+- The app is not externally validated and must not be used for medical decisions.
 
-- **Model:** Logistic Regression
-- **Split:** 80/20, stratified by `stroke`, random_state=42
-- **Dataset size:** 4,603 rows (4,241 negative / 362 positive stroke cases)
-- **Class imbalance:** ~92% negative, ~8% positive — model currently predicts all-negative
-- **Test-set metrics:**
-  - Accuracy: 0.92 (misleading due to imbalance)
-  - Precision: 0.00
-  - Recall: 0.00
-  - ROC AUC: 0.60
+## Useful Links
 
-> The baseline is intentionally minimal. The next modeling step is to address class imbalance (e.g., class weights, resampling) and drop confirmed leakage columns.
-
-Full metrics: [`reports/baseline_metrics.md`](../../reports/baseline_metrics.md)
-
----
-
-## Lane status (as of Week 04)
-
-| Lane | Lead status | Current focus |
-|---|---|---|
-| Data + Pipeline | Active | Data sanity check, model improvement |
-| Docs + Content | Active | App content files, refining reference docs |
-| App | Paused | Lead was absent Week 04, resuming when available |
-
----
-
-## Key decisions made
-
-- **Dataset:** NHANES-derived stroke dataset (individual-level, reputable source, rich features)
-- **Model framing:** Prevention-style risk scoring — inputs should not include post-stroke consequences
-- **Leakage policy:** `General health condition`, `Minutes sedentary activity`, and `depression` are first-drop candidates
-- **No conda:** project uses plain Python `venv`
-
----
-
-## Links
-
+- [App input schema](../app_content/app_input_schema.md)
+- [Risk labels](../app_content/risk_level_labels.md)
+- [Disclaimer](../app_content/disclaimer_and_limitations.md)
+- [Baseline metrics](../../reports/baseline_metrics.md)
 - [Data dictionary](data_dictionary.md)
 - [Leakage candidates](leakage_candidates.md)
-- [Baseline metrics](../../reports/baseline_metrics.md)
-- [Latest recap](recaps/week-04.md)
-- [Workflow overview](../workflow/workflow.md)
